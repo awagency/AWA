@@ -57,9 +57,12 @@ export const IconParticles = ({
   const planeRef = useRef(new THREE.Plane());
   const hitRef = useRef(new THREE.Vector3());
   const { camera, viewport } = useThree();
+  
+  // Boost temporal cuando el usuario hace scroll hacia abajo
+  const scrollBoost = useRef(0);
 
   useEffect(() => {
-    // Asegura que los PNG se vean “nítidos” y con color correcto.
+    // Asegura que los PNG se vean "nítidos" y con color correcto.
     textures.forEach((tex) => {
       if (!tex) return;
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -70,6 +73,22 @@ export const IconParticles = ({
       tex.needsUpdate = true;
     });
   }, [textures]);
+
+  useEffect(() => {
+    // Capturar eventos de wheel para controlar dirección de partículas
+    const handleWheel = (e) => {
+      if (e.deltaY > 0) {
+        // Scroll hacia ABAJO: partículas suben más rápido
+        scrollBoost.current = Math.min(scrollBoost.current + 3.5, 10);
+      } else {
+        // Scroll hacia ARRIBA: partículas bajan momentáneamente (boost negativo)
+        scrollBoost.current = Math.max(scrollBoost.current - 3.5, -6);
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, []);
 
   // Medimos el ancho/alto real del viewport al Z donde van los íconos
   // para que el rango de aparición ocupe todo el width, independiente de la pantalla.
@@ -168,6 +187,14 @@ export const IconParticles = ({
       globalFade = 1 - smoothstep(fadeOutStart, fadeOutEnd, scrollProgress);
     }
 
+    // Decay suave del boost: vuelve a 0 gradualmente (sea positivo o negativo)
+    const decaySpeed = 4.5;
+    if (scrollBoost.current > 0) {
+      scrollBoost.current = Math.max(0, scrollBoost.current - delta * decaySpeed);
+    } else if (scrollBoost.current < 0) {
+      scrollBoost.current = Math.min(0, scrollBoost.current + delta * decaySpeed);
+    }
+
     const t = state.clock.elapsedTime;
     const xHalf = vpAtZ.width * 0.5;
     const xPadding = Math.max(0.25, vpAtZ.width * 0.02);
@@ -181,7 +208,9 @@ export const IconParticles = ({
       if (!sprite) continue;
 
       const p = particles[i];
-      sprite.position.y += p.speed * delta;
+      // Aplicar velocidad base + boost de scroll (cuando el usuario scrollea hacia abajo)
+      const speedWithBoost = p.speed + scrollBoost.current;
+      sprite.position.y += speedWithBoost * delta;
       // Base X: carril fijo + jitter + wobble (sin acumularse en el centro)
       const baseX =
         (p.laneBaseX ?? 0) + (p.xJitter ?? 0) + Math.sin(t * 0.6 + p.phase) * p.wobble;
