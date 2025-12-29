@@ -72,9 +72,9 @@ export const OptionsOverlay = ({ onOptionClick }) => {
       }}
     >
       {isGlassVisible && (
-        <GlassGroup
-          sectionHover={sectionHover}
-          activeInfo={activeInfo} />
+      <GlassGroup
+        sectionHover={sectionHover}
+        activeInfo={activeInfo} />
       )}
       {isVisible && !activeInfo && !isLeavingOptions && (
         <Options

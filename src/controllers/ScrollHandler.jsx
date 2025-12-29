@@ -80,7 +80,7 @@ export const ScrollHandler = () => {
           // Activar la salida de las imágenes glass
           setIsLeavingOptions(true);
           
-          // Esperar 0.6s para que las imágenes empiecen a desaparecer
+          // Esperar 1 segundo para que las imágenes desaparezcan
           setTimeout(() => {
             currentSection--;
             const targetProgress = sections[currentSection];
@@ -90,13 +90,13 @@ export const ScrollHandler = () => {
             setTimeout(() => {
               setIsLeavingOptions(false);
             }, 3500);
-          }, 600);
+          }, 1000);
         } else {
           // Para otras secciones, comportamiento normal
           currentSection--;
-          const targetProgress = sections[currentSection];
-          isAnimating = true;
-          smoothScrollTo(targetProgress);
+      const targetProgress = sections[currentSection];
+      isAnimating = true;
+      smoothScrollTo(targetProgress);
         }
       }
     };

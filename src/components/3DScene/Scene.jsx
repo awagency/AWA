@@ -8,10 +8,10 @@ import Model from "../../context/Models";
 import * as THREE from "three";
 import OptimizedModel from "../3DModels/OptimizedModel";
 
+// Layer dedicado para las luces de la moneda
 const COIN_LIGHT_LAYER = 1;
 
-// Rig de luces dedicado a la moneda (oro/metal): key cálida + fill neutra + rim fría + ambient suave.
-// Se limita a la moneda usando layers de three.js (las demás meshes no tienen habilitada esta layer).
+// Sistema de iluminación dedicado para la moneda
 const CoinLightRig = () => {
   const { coinRef } = useContext(AppContext);
   const rigRef = useRef();
@@ -26,14 +26,12 @@ const CoinLightRig = () => {
   const frontRef = useRef();
 
   useEffect(() => {
-    // Nota: las layers se configuran por Object3D, así que lo aplicamos a cada luz.
     [ambientRef, hemiRef, keyRef, fillRef, rimRef, bounceRef, sparkleARef, sparkleBRef, frontRef].forEach((r) => {
       if (r.current) r.current.layers.set(COIN_LIGHT_LAYER);
     });
   }, []);
 
   useFrame(() => {
-    // Hace que el rig acompañe el recorrido de la coin para mantener el look consistente.
     if (rigRef.current && coinRef?.current) {
       rigRef.current.position.copy(coinRef.current.position);
     }
@@ -41,16 +39,13 @@ const CoinLightRig = () => {
 
   return (
     <group ref={rigRef}>
-      {/* Base suave (sin "lavar" el contraste) */}
       <ambientLight ref={ambientRef} intensity={0.22} color={"#fff4db"} />
       <hemisphereLight
         ref={hemiRef}
         intensity={0.42}
         color={"#ffffff"}
-        groundColor={"#c98a3a"} // rebote cálido, ayuda a "oro"
+        groundColor={"#c98a3a"}
       />
-
-      {/* Key principal cálida */}
       <directionalLight
         ref={keyRef}
         position={[4.2, 2.4, 5.2]}
@@ -58,8 +53,6 @@ const CoinLightRig = () => {
         color={"#ffd39a"}
         castShadow={false}
       />
-
-      {/* Fill neutra para levantar sombras */}
       <pointLight
         ref={fillRef}
         position={[-4.0, 1.4, 3.2]}
@@ -69,8 +62,6 @@ const CoinLightRig = () => {
         decay={2}
         castShadow={false}
       />
-
-      {/* Rim/back fría para recortar bordes */}
       <pointLight
         ref={rimRef}
         position={[0.0, 3.8, -5.2]}
@@ -80,8 +71,6 @@ const CoinLightRig = () => {
         decay={2}
         castShadow={false}
       />
-
-      {/* Bounce desde abajo (rebote cálido) */}
       <pointLight
         ref={bounceRef}
         position={[0.0, -2.2, 2.2]}
@@ -91,8 +80,6 @@ const CoinLightRig = () => {
         decay={2}
         castShadow={false}
       />
-
-      {/* Spots "rasantes" para highlights tipo metal al girar */}
       <spotLight
         ref={sparkleARef}
         position={[2.2, 0.6, 3.6]}
@@ -115,8 +102,6 @@ const CoinLightRig = () => {
         decay={2}
         castShadow={false}
       />
-
-      {/* Luz frontal más intensa para "levantar" el dorado cuando está de frente */}
       <pointLight
         ref={frontRef}
         position={[0.0, 0.2, 6.5]}
@@ -168,9 +153,14 @@ const FloatingModel = ({ position = [0, 0, 0], offset = 0, children ,character})
 
 
 export const Scene = () => {
-  const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref } = useContext(AppContext);
+  const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref, coinHasLanded } = useContext(AppContext);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { viewport, camera } = useThree();
+
+  // Habilitar el layer de luces de la moneda en la cámara
+  useEffect(() => {
+    camera.layers.enable(COIN_LIGHT_LAYER);
+  }, [camera]);
 
   // NUEVO: referencia para el grupo del maletín
   const maletinGroupRef = useRef();
@@ -186,11 +176,6 @@ export const Scene = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  useEffect(() => {
-    // Importante: si las luces están en otra layer, la cámara debe tenerla habilitada
-    camera.layers.enable(COIN_LIGHT_LAYER);
-  }, [camera]);
-
   const showModels = scrollProgress <= 0.01 || activeInfo;
   const positionModel = scrollProgress <= 0.1 || !activeInfo;
 
@@ -198,7 +183,16 @@ export const Scene = () => {
     <>
       <SoftShadows size={25} samples={16} focus={0.5} />
       <ambientLight intensity={0.5} />
-      <IconParticles />
+      
+      {/* Environment para reflexiones realistas en la moneda */}
+      <Environment preset="city" background={false} blur={0.25} />
+      
+      {/* Sistema de iluminación dedicado para la moneda */}
+      <CoinLightRig />
+      
+      {/* Partículas de íconos hexagonales - aparecen cuando la moneda ha aterrizado */}
+      {coinHasLanded && <IconParticles />}
+      
       <directionalLight
         position={[5, 5, 5]}
         intensity={1}
@@ -236,11 +230,6 @@ export const Scene = () => {
         scrollProgress={scrollProgress}
         count={4000}
       />
-
-      {/* Reflejos (IBL) para que el metal dorado "resplandezca" */}
-      <Environment preset="city" background={false} blur={0.25} />
-
-      <CoinLightRig />
       <CoinModel scrollProgress={scrollProgress} />
 
       {showModels && (
