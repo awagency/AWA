@@ -55,9 +55,9 @@ export default function MainApp() {
 
                 }}
               onCreated={({ gl }) => {
-                // Un toque de “exposure” ayuda mucho a metales dorados sin tener que subir intensidades absurdas.
+                // Exposure aumentado para que la moneda irradie más poder y luz
                 gl.toneMapping = THREE.ACESFilmicToneMapping;
-                gl.toneMappingExposure = 1.25;
+                gl.toneMappingExposure = 1.35;
                 gl.outputColorSpace = THREE.SRGBColorSpace;
               }}
                 // dpr={Math.min(window.devicePixelRatio, 2)} // Limita el DPR para mejor rendimiento
@@ -65,7 +65,7 @@ export default function MainApp() {
                     width: "100vw",
                     height: "100vh",
                     position: "fixed",
-                    background: "linear-gradient(145deg, #ffffff 0%, #eaeaea 33%, #d4d4d4 66%, #c0c0c0 100%)",
+                    background: "#f8f9fa", // Blanco suave, cálido y luminoso (no puro para no cansar la vista)
                     zIndex: 20, // Cambiado directamente aquí también
                 }}
                 // camera={{ position: [0, 0, 3], fov: 50, near: 0.1, far: 1000 }} // Cámara más cerca al inicio

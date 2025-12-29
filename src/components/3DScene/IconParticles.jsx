@@ -31,9 +31,9 @@ const smoothstep = (edge0, edge1, x) => {
 
 // Helper para generar Z con sesgo + chance de íconos "apenas más cerca" (sutilmente).
 const pickZ = ({ zMin, zMax, closeChance = 0.25, closeBoost = 3.5 }) => {
-  // zMax es el más cercano (menos negativo, e.g. -14). "Más cerca" => subir z (menos negativo).
+  // zMax es el más cercano (menos negativo, e.g. -18). "Más cerca" => subir z (menos negativo).
   if (Math.random() < closeChance) {
-    const zCloserMax = Math.min(zMax + closeBoost, -8); // cap para no meterse demasiado al frente
+    const zCloserMax = Math.min(zMax + closeBoost, -15); // cap para NUNCA tapar la moneda (moneda está en Z=-3 a Z=10)
     return rand(zMax, zCloserMax);
   }
   // Sesgo a cerca dentro del rango normal
@@ -45,9 +45,11 @@ const pickZ = ({ zMin, zMax, closeChance = 0.25, closeBoost = 3.5 }) => {
 export const IconParticles = ({
   // Pocas partículas, pero cubriendo todo el ancho del viewport en total (no "amontonadas").
   count = 9,
-  // Profundidad donde viven los íconos (ajustable según tu escena).
-  zMin = -26,
-  zMax = -14,
+  // Profundidad donde viven los íconos: SIEMPRE detrás de la moneda (moneda Z va de -3 a 10).
+  zMin = -35,
+  zMax = -18,
+  // Multiplicador de opacidad para simular distancia (1.0 = normal, 0.5 = más tenue)
+  opacityMultiplier = 1.0,
 }) => {
   const { coinHasLanded, scrollProgress } = useContext(AppContext);
   const textures = useTexture(ICON_URLS);
@@ -82,10 +84,10 @@ export const IconParticles = ({
     const handleWheel = (e) => {
       if (e.deltaY > 0) {
         // Scroll hacia ABAJO: partículas suben más rápido
-        scrollBoost.current = Math.min(scrollBoost.current + 4.5, 13); // Aumentado de (3.5, 10) a (4.5, 13)
+        scrollBoost.current = Math.min(scrollBoost.current + 7, 20); // Aumentado para mantener proporción con velocidad base
       } else {
         // Scroll hacia ARRIBA: partículas bajan momentáneamente (boost negativo)
-        scrollBoost.current = Math.max(scrollBoost.current - 4.5, -8); // Aumentado de (3.5, -6) a (4.5, -8)
+        scrollBoost.current = Math.max(scrollBoost.current - 7, -12); // Aumentado para mantener proporción
       }
     };
 
@@ -138,12 +140,13 @@ export const IconParticles = ({
       const rotBase = lerp(0.05, 0.18, 1 - depth01) * lerp(0.9, 1.25, tierPick);
       const rotSpeed = rotBase * (Math.random() < 0.5 ? -1 : 1);
 
-      // Opacidad: cerca un poquito más visible
-      const opacity = lerp(0.98, 0.75, depth01) * rand(0.92, 1.0);
+      // Opacidad: cerca un poquito más visible, ajustada por el multiplicador de profundidad
+      const opacity = lerp(0.98, 0.75, depth01) * rand(0.92, 1.0) * opacityMultiplier;
 
       // IMPORTANTE: inicializar TODAS las partículas DEBAJO del viewport
       // para que "broten" desde abajo cuando la moneda aterrice.
-      const startY = yBottom - spawnSpacing * (i + rand(0.3, 1.2));
+      // Reducido el multiplicador para que aparezcan más rápido
+      const startY = yBottom - spawnSpacing * (i + rand(0.1, 0.5));
 
       return {
         iconIdx,
@@ -155,7 +158,7 @@ export const IconParticles = ({
         ),
         baseZ: z,
         // Movimiento: vertical constante, con leve variación (más cerca = un toque más rápido)
-        speed: lerp(0.75, 1.2, 1 - depth01) * rand(0.92, 1.08), // Aumentado de (0.55, 0.9) a (0.75, 1.2)
+        speed: lerp(2.2, 3.0, 1 - depth01) * rand(0.95, 1.12), // Aumentado para movimiento más rápido
         wobble: lerp(0.09, 0.03, depth01) * rand(0.85, 1.15), // micro wobble lateral
         phase: rand(0, Math.PI * 2),
         scale,
@@ -182,7 +185,7 @@ export const IconParticles = ({
     // Cuando ENTRAMOS a la zona de fade (scroll hacia la pantalla donde se desactivan)
     if (inFadeZone && !prevInFadeZone.current) {
       // Aplicar boost fuerte para que todas escapen hacia arriba rápido
-      escapingBoost.current = 26; // Aumentado de 20 a 26
+      escapingBoost.current = 48; // Aumentado para mantener efecto dramático con nueva velocidad base
     }
     
     // Cuando SALIMOS de la zona (volvemos atrás)
@@ -199,8 +202,8 @@ export const IconParticles = ({
       particles.forEach((p, i) => {
         const sprite = spriteRefs.current[i];
         if (sprite) {
-          // Reiniciar desde abajo, espaciadas
-          const startY = yBottom - spawnSpacing * (i + rand(0.3, 1.2));
+          // Reiniciar desde abajo, espaciadas (reducido para aparición más rápida)
+          const startY = yBottom - spawnSpacing * (i + rand(0.1, 0.5));
           sprite.position.y = startY;
           p.yBottom = yBottom;
           p.yTop = yHalf + yPadding;
@@ -216,30 +219,24 @@ export const IconParticles = ({
     // Si estamos en la zona de fade: acelerar escape y fade-out progresivo
     if (inFadeZone) {
       // Decay más lento para que dure más el escape
-      escapingBoost.current = Math.max(0, escapingBoost.current - delta * 4);
+      escapingBoost.current = Math.max(0, escapingBoost.current - delta * 6.5); // Aumentado para mantener proporción
       
       // Contar cuántas partículas ya escaparon (están fuera del viewport)
       const yHalf = vpAtZ.height * 0.5;
       const yPadding = Math.max(1.2, vpAtZ.height * 0.12);
       const yTop = yHalf + yPadding;
       
-      let allEscaped = true;
+      // Ocultar partículas que ya escaparon (sin detener la animación)
       for (let i = 0; i < particles.length; i++) {
         const sprite = spriteRefs.current[i];
-        if (sprite && sprite.position.y <= yTop + 3) {
-          allEscaped = false;
-          break;
+        if (sprite && sprite.position.y > yTop + 3) {
+          sprite.material.opacity = 0;
         }
-      }
-      
-      // Si todas escaparon, detener animación
-      if (allEscaped) {
-        return;
       }
     }
 
     // Decay suave del boost: vuelve a 0 gradualmente (sea positivo o negativo)
-    const decaySpeed = 4.5;
+    const decaySpeed = 7.5; // Aumentado para mantener proporción con velocidad base más rápida
     if (scrollBoost.current > 0) {
       scrollBoost.current = Math.max(0, scrollBoost.current - delta * decaySpeed);
     } else if (scrollBoost.current < 0) {
@@ -340,7 +337,7 @@ export const IconParticles = ({
           // "Brotado" continuo: respawn más espaciado (debajo del borde inferior),
           // así no aparecen en grupo aunque varias desaparezcan cerca en el tiempo.
           const spacing = p.spawnSpacing ?? (p.yTop - p.yBottom) / Math.max(1, count);
-          sprite.position.y = p.yBottom - rand(0.6, 2.4) * spacing;
+          sprite.position.y = p.yBottom - rand(0.3, 0.8) * spacing; // Reducido para aparición más rápida
           // Evitar acumulación: mantener el carril fijo; solo re-jitter leve
           p.xJitter = rand(-0.45, 0.45);
           sprite.position.x = (p.laneBaseX ?? 0) + p.xJitter;
@@ -365,9 +362,9 @@ export const IconParticles = ({
           const rotBase = lerp(0.05, 0.18, 1 - p.depth01) * lerp(0.9, 1.25, tierPick);
           p.rotSpeed = rotBase * (Math.random() < 0.5 ? -1 : 1);
 
-          p.speed = lerp(0.75, 1.2, 1 - p.depth01) * rand(0.92, 1.08); // Aumentado de (0.55, 0.9) a (0.75, 1.2)
+          p.speed = lerp(2.2, 3.0, 1 - p.depth01) * rand(0.95, 1.12); // Aumentado para movimiento más rápido
           p.wobble = lerp(0.09, 0.03, p.depth01) * rand(0.85, 1.15);
-          p.opacityBase = lerp(0.98, 0.75, p.depth01) * rand(0.92, 1.0);
+          p.opacityBase = lerp(0.98, 0.75, p.depth01) * rand(0.92, 1.0) * opacityMultiplier;
 
           // Cambiar icono al respawn (sin re-render): actualizamos el map del material directamente
           if (Math.random() < 0.7) {
@@ -398,6 +395,7 @@ export const IconParticles = ({
             // Importante: NO resetear posición en cada render (p.ej. al mover el mouse).
             if (!initializedRef.current[i]) {
               el.position.copy(p.position);
+              el.renderOrder = -1; // Renderizar antes que la moneda (orden por defecto es 0)
               // Seteamos el map inicial una sola vez para que después podamos mutarlo en runtime.
               if (el.material?.map !== textures[p.iconIdx]) {
                 el.material.map = textures[p.iconIdx];
@@ -413,7 +411,7 @@ export const IconParticles = ({
             transparent
             opacity={p.opacityBase ?? 0.9}
             depthWrite={false}
-            depthTest={false}
+            depthTest={true}
             color={"#ffffff"}
             blending={THREE.NormalBlending}
           />

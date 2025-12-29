@@ -31,18 +31,20 @@ export const CoinModel = ({ scrollProgress }) => {
           obj.layers.enable(COIN_LIGHT_LAYER);
           obj.castShadow = true;
           obj.receiveShadow = true;
+          obj.renderOrder = 0; // Renderizar después de las partículas (que tienen renderOrder = -1)
 
-          // Ajuste suave para que el dorado se lea como metal (sin tocar texturas del GLB)
+          // Ajuste para que el dorado irradie poder y luz como un objeto poderoso
           const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
           mats.forEach((m) => {
             if (!m) return;
-            if (typeof m.metalness === "number") m.metalness = Math.max(m.metalness, 0.9);
-            // Un poquito menos “satinado”: subimos apenas roughness y bajamos reflejos.
-            if (typeof m.roughness === "number") m.roughness = Math.min(m.roughness, 0.32);
-            if (typeof m.envMapIntensity === "number") m.envMapIntensity = Math.max(m.envMapIntensity, 2.3);
-            // Si el material lo soporta (MeshPhysicalMaterial / extensiones glTF), suma un “clearcoat” sutil
-            if (typeof m.clearcoat === "number") m.clearcoat = Math.max(m.clearcoat, 0.45);
-            if (typeof m.clearcoatRoughness === "number") m.clearcoatRoughness = Math.min(m.clearcoatRoughness, 0.18);
+            if (typeof m.metalness === "number") m.metalness = Math.max(m.metalness, 0.92);
+            // Menos roughness para más reflectividad y brillo
+            if (typeof m.roughness === "number") m.roughness = Math.min(m.roughness, 0.28);
+            // Aumentado para que irradie más luz
+            if (typeof m.envMapIntensity === "number") m.envMapIntensity = Math.max(m.envMapIntensity, 2.7);
+            // Clearcoat más alto para efecto de "poder"
+            if (typeof m.clearcoat === "number") m.clearcoat = Math.max(m.clearcoat, 0.55);
+            if (typeof m.clearcoatRoughness === "number") m.clearcoatRoughness = Math.min(m.clearcoatRoughness, 0.15);
             m.needsUpdate = true;
           });
         }

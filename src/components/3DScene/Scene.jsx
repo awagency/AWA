@@ -11,6 +11,45 @@ import OptimizedModel from "../3DModels/OptimizedModel";
 // Layer dedicado para las luces de la moneda
 const COIN_LIGHT_LAYER = 1;
 
+// Resplandor ambiental que sigue a la moneda e ilumina el espacio alrededor
+const CoinAmbientGlow = () => {
+  const { coinRef } = useContext(AppContext);
+  const glowRef = useRef();
+
+  useFrame(() => {
+    if (glowRef.current && coinRef?.current) {
+      glowRef.current.position.copy(coinRef.current.position);
+    }
+  });
+
+  return (
+    <group ref={glowRef}>
+      {/* Luces ambientales globales que iluminan el espacio */}
+      <pointLight
+        position={[0, 0, 0]}
+        intensity={1.5}
+        color={"#ffd700"}
+        distance={25}
+        decay={1.5}
+      />
+      <pointLight
+        position={[0, 0, 5]}
+        intensity={1.0}
+        color={"#ffe8a8"}
+        distance={20}
+        decay={1.8}
+      />
+      <pointLight
+        position={[0, 0, -5]}
+        intensity={0.8}
+        color={"#fff5d6"}
+        distance={18}
+        decay={1.8}
+      />
+    </group>
+  );
+};
+
 // Sistema de iluminación dedicado para la moneda
 const CoinLightRig = () => {
   const { coinRef } = useContext(AppContext);
@@ -39,77 +78,114 @@ const CoinLightRig = () => {
 
   return (
     <group ref={rigRef}>
-      <ambientLight ref={ambientRef} intensity={0.22} color={"#fff4db"} />
+      <ambientLight ref={ambientRef} intensity={0.28} color={"#fff8e6"} />
       <hemisphereLight
         ref={hemiRef}
-        intensity={0.42}
-        color={"#ffffff"}
-        groundColor={"#c98a3a"}
+        intensity={0.52}
+        color={"#fffaed"}
+        groundColor={"#d4a557"}
       />
       <directionalLight
         ref={keyRef}
         position={[4.2, 2.4, 5.2]}
-        intensity={2.1}
+        intensity={2.8}
         color={"#ffd39a"}
         castShadow={false}
       />
       <pointLight
         ref={fillRef}
         position={[-4.0, 1.4, 3.2]}
-        intensity={1.35}
+        intensity={1.8}
         color={"#ffffff"}
-        distance={80}
-        decay={2}
+        distance={90}
+        decay={1.9}
         castShadow={false}
       />
       <pointLight
         ref={rimRef}
         position={[0.0, 3.8, -5.2]}
-        intensity={1.55}
-        color={"#d7e8ff"}
-        distance={80}
-        decay={2}
+        intensity={2.0}
+        color={"#e8f2ff"}
+        distance={90}
+        decay={1.9}
         castShadow={false}
       />
       <pointLight
         ref={bounceRef}
         position={[0.0, -2.2, 2.2]}
-        intensity={1.0}
-        color={"#ffcf8a"}
-        distance={60}
-        decay={2}
+        intensity={1.3}
+        color={"#ffdb8f"}
+        distance={70}
+        decay={1.9}
         castShadow={false}
       />
       <spotLight
         ref={sparkleARef}
         position={[2.2, 0.6, 3.6]}
-        intensity={3.2}
+        intensity={4.0}
         color={"#ffffff"}
-        angle={0.55}
-        penumbra={0.65}
-        distance={90}
-        decay={2}
+        angle={0.6}
+        penumbra={0.7}
+        distance={110}
+        decay={1.9}
         castShadow={false}
       />
       <spotLight
         ref={sparkleBRef}
         position={[-2.4, 1.2, 3.8]}
-        intensity={2.4}
-        color={"#fff2cf"}
-        angle={0.5}
-        penumbra={0.7}
-        distance={90}
-        decay={2}
+        intensity={3.2}
+        color={"#fff9e3"}
+        angle={0.55}
+        penumbra={0.75}
+        distance={110}
+        decay={1.9}
         castShadow={false}
       />
       <pointLight
         ref={frontRef}
         position={[0.0, 0.2, 6.5]}
-        intensity={2.4}
-        color={"#ffe2b5"}
-        distance={120}
-        decay={2}
+        intensity={3.2}
+        color={"#ffe8ba"}
+        distance={130}
+        decay={1.9}
         castShadow={false}
+      />
+      
+      {/* Luces de "halo" para que irradie poder alrededor */}
+      <pointLight
+        position={[0.0, 0.0, 0.0]}
+        intensity={1.8}
+        color={"#ffd700"}
+        distance={20}
+        decay={1.8}
+      />
+      <pointLight
+        position={[3.0, 0.0, 0.0]}
+        intensity={1.0}
+        color={"#ffe97d"}
+        distance={18}
+        decay={2}
+      />
+      <pointLight
+        position={[-3.0, 0.0, 0.0]}
+        intensity={1.0}
+        color={"#ffe97d"}
+        distance={18}
+        decay={2}
+      />
+      <pointLight
+        position={[0.0, 3.0, 0.0]}
+        intensity={1.0}
+        color={"#fff4d6"}
+        distance={18}
+        decay={2}
+      />
+      <pointLight
+        position={[0.0, -3.0, 0.0]}
+        intensity={1.0}
+        color={"#ffda6a"}
+        distance={18}
+        decay={2}
       />
     </group>
   );
@@ -190,7 +266,13 @@ export const Scene = () => {
       {/* Sistema de iluminación dedicado para la moneda */}
       <CoinLightRig />
       
-      {/* Partículas de íconos hexagonales - aparecen cuando la moneda ha aterrizado */}
+      {/* Resplandor ambiental que hace que la moneda irradie luz al espacio */}
+      <CoinAmbientGlow />
+      
+      {/* Partículas de fondo (más lejanas) para dar profundidad */}
+      {coinHasLanded && <IconParticles count={6} zMin={-60} zMax={-40} opacityMultiplier={0.4} />}
+      
+      {/* Partículas de íconos hexagonales (primer plano) - aparecen cuando la moneda ha aterrizado */}
       {coinHasLanded && <IconParticles />}
       
       <directionalLight
