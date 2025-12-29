@@ -7,19 +7,29 @@ import GlassGroup from "./components/GlassGroup";
 import { AppContext } from "../../context/AppContext";
 
 export const OptionsOverlay = ({ onOptionClick }) => {
-  const { setCameraTarget, setActiveInfo, activeInfo } = useContext(AppContext);
+  const { setCameraTarget, setActiveInfo, activeInfo, isLeavingOptions } = useContext(AppContext);
   const [isVisible, setIsVisible] = useState(false);
   const [isVisible2, setIsVisible2] = useState(false);
+  const [isGlassVisible, setIsGlassVisible] = useState(false);
   const [pressedIndex, setPressedIndex] = useState(null);
   const [sectionHover, setSectionHover] = useState("");
 
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 2000);
+    // Delay para las imágenes de vidrio (GlassGroup)
+    const glassTimer = setTimeout(() => {
+      setIsGlassVisible(true);
+    }, 2500); // 3.5 segundos para que las partículas escapen primero
 
-    return () => clearTimeout(timer);
+    // Delay para los botones/opciones
+    const optionsTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 4000); // 4 segundos
+
+    return () => {
+      clearTimeout(glassTimer);
+      clearTimeout(optionsTimer);
+    };
   }, []);
 
 
@@ -40,9 +50,11 @@ export const OptionsOverlay = ({ onOptionClick }) => {
     setCameraTarget([0, 0, 15]);
 
     setIsVisible(false); // Ocultar opciones antes de volver a mostrarlas
+    setIsGlassVisible(false); // Ocultar también las imágenes de vidrio
     setTimeout(() => {
-      setIsVisible(true); // Volver a mostrar opciones después de 2 segundos
-    }, 2000);
+      setIsGlassVisible(true); // Mostrar imágenes después de 3.5 segundos
+      setIsVisible(true); // Volver a mostrar opciones después de 4 segundos
+    }, 4000);
   };
 
   return (
@@ -59,10 +71,12 @@ export const OptionsOverlay = ({ onOptionClick }) => {
         zIndex: 20,
       }}
     >
-      <GlassGroup
-        sectionHover={sectionHover}
-        activeInfo={activeInfo} />
-      {isVisible && !activeInfo && (
+      {isGlassVisible && (
+        <GlassGroup
+          sectionHover={sectionHover}
+          activeInfo={activeInfo} />
+      )}
+      {isVisible && !activeInfo && !isLeavingOptions && (
         <Options
           sectionHover={sectionHover}
           setSectionHover={setSectionHover}

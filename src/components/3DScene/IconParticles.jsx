@@ -60,6 +60,9 @@ export const IconParticles = ({
   
   // Boost temporal cuando el usuario hace scroll hacia abajo
   const scrollBoost = useRef(0);
+  // Track para detectar transiciones entre zona activa/inactiva
+  const prevInFadeZone = useRef(false);
+  const escapingBoost = useRef(0);
 
   useEffect(() => {
     // Asegura que los PNG se vean "nítidos" y con color correcto.
@@ -79,10 +82,10 @@ export const IconParticles = ({
     const handleWheel = (e) => {
       if (e.deltaY > 0) {
         // Scroll hacia ABAJO: partículas suben más rápido
-        scrollBoost.current = Math.min(scrollBoost.current + 3.5, 10);
+        scrollBoost.current = Math.min(scrollBoost.current + 4.5, 13); // Aumentado de (3.5, 10) a (4.5, 13)
       } else {
         // Scroll hacia ARRIBA: partículas bajan momentáneamente (boost negativo)
-        scrollBoost.current = Math.max(scrollBoost.current - 3.5, -6);
+        scrollBoost.current = Math.max(scrollBoost.current - 4.5, -8); // Aumentado de (3.5, -6) a (4.5, -8)
       }
     };
 
@@ -152,7 +155,7 @@ export const IconParticles = ({
         ),
         baseZ: z,
         // Movimiento: vertical constante, con leve variación (más cerca = un toque más rápido)
-        speed: lerp(0.55, 0.9, 1 - depth01) * rand(0.92, 1.08),
+        speed: lerp(0.75, 1.2, 1 - depth01) * rand(0.92, 1.08), // Aumentado de (0.55, 0.9) a (0.75, 1.2)
         wobble: lerp(0.09, 0.03, depth01) * rand(0.85, 1.15), // micro wobble lateral
         phase: rand(0, Math.PI * 2),
         scale,
@@ -172,19 +175,67 @@ export const IconParticles = ({
   }, [count, vpAtZ.width, vpAtZ.height, zMin, zMax]);
 
   useFrame((state, delta) => {
-    // Fade-out cuando la moneda se centra (scrollProgress >= 0.4)
-    // Definimos un rango suave para la transición
-    const fadeOutStart = 0.38; // empieza a desaparecer
-    const fadeOutEnd = 0.45;   // completamente oculto
-    let globalFade = 1;
+    // Detectar entrada/salida de la zona de fade-out
+    const fadeOutStart = 0.38;
+    const inFadeZone = scrollProgress >= fadeOutStart;
     
-    if (scrollProgress >= fadeOutStart) {
-      if (scrollProgress >= fadeOutEnd) {
-        // Completamente oculto: no animar (ahorro de recursos)
+    // Cuando ENTRAMOS a la zona de fade (scroll hacia la pantalla donde se desactivan)
+    if (inFadeZone && !prevInFadeZone.current) {
+      // Aplicar boost fuerte para que todas escapen hacia arriba rápido
+      escapingBoost.current = 26; // Aumentado de 20 a 26
+    }
+    
+    // Cuando SALIMOS de la zona (volvemos atrás)
+    if (!inFadeZone && prevInFadeZone.current) {
+      // Resetear posiciones para que reaparezcan desde abajo
+      const xHalf = vpAtZ.width * 0.5;
+      const yHalf = vpAtZ.height * 0.5;
+      const xPadding = Math.max(0.25, vpAtZ.width * 0.02);
+      const yPadding = Math.max(1.2, vpAtZ.height * 0.12);
+      const yBottom = -yHalf - yPadding;
+      const ySpan = (yHalf + yPadding) - yBottom;
+      const spawnSpacing = ySpan / Math.max(1, particles.length);
+      
+      particles.forEach((p, i) => {
+        const sprite = spriteRefs.current[i];
+        if (sprite) {
+          // Reiniciar desde abajo, espaciadas
+          const startY = yBottom - spawnSpacing * (i + rand(0.3, 1.2));
+          sprite.position.y = startY;
+          p.yBottom = yBottom;
+          p.yTop = yHalf + yPadding;
+          sprite.material.opacity = p.opacityBase ?? 0.9;
+        }
+      });
+      
+      escapingBoost.current = 0;
+    }
+    
+    prevInFadeZone.current = inFadeZone;
+    
+    // Si estamos en la zona de fade: acelerar escape y fade-out progresivo
+    if (inFadeZone) {
+      // Decay más lento para que dure más el escape
+      escapingBoost.current = Math.max(0, escapingBoost.current - delta * 4);
+      
+      // Contar cuántas partículas ya escaparon (están fuera del viewport)
+      const yHalf = vpAtZ.height * 0.5;
+      const yPadding = Math.max(1.2, vpAtZ.height * 0.12);
+      const yTop = yHalf + yPadding;
+      
+      let allEscaped = true;
+      for (let i = 0; i < particles.length; i++) {
+        const sprite = spriteRefs.current[i];
+        if (sprite && sprite.position.y <= yTop + 3) {
+          allEscaped = false;
+          break;
+        }
+      }
+      
+      // Si todas escaparon, detener animación
+      if (allEscaped) {
         return;
       }
-      // Fade suave usando smoothstep
-      globalFade = 1 - smoothstep(fadeOutStart, fadeOutEnd, scrollProgress);
     }
 
     // Decay suave del boost: vuelve a 0 gradualmente (sea positivo o negativo)
@@ -208,8 +259,8 @@ export const IconParticles = ({
       if (!sprite) continue;
 
       const p = particles[i];
-      // Aplicar velocidad base + boost de scroll (cuando el usuario scrollea hacia abajo)
-      const speedWithBoost = p.speed + scrollBoost.current;
+      // Aplicar velocidad base + boost de scroll + boost de "escape"
+      const speedWithBoost = p.speed + scrollBoost.current + escapingBoost.current;
       sprite.position.y += speedWithBoost * delta;
       // Base X: carril fijo + jitter + wobble (sin acumularse en el centro)
       const baseX =
@@ -269,57 +320,68 @@ export const IconParticles = ({
         sprite.position.z = (p.baseZ ?? sprite.position.z) + nextRz;
       }
 
-      // Fade-in/out suave (más "premium", evita pops) + fade global por scroll
+      // Fade-in/out suave (más "premium", evita pops)
       const yN = (sprite.position.y - p.yBottom) / (p.yTop - p.yBottom); // 0..1
       const fadeIn = smoothstep(0.03, 0.16, yN);
       const fadeOut = 1 - smoothstep(0.84, 0.97, yN);
-      sprite.material.opacity = (p.opacityBase ?? 0.9) * fadeIn * fadeOut * globalFade;
+      let opacity = (p.opacityBase ?? 0.9) * fadeIn * fadeOut;
+      
+      // Fade-out adicional durante escape: desaparecen más rápido mientras suben
+      if (inFadeZone) {
+        const escapeProgress = Math.min(1, (sprite.position.y - p.yBottom) / (p.yTop - p.yBottom + 4));
+        opacity *= (1 - smoothstep(0.5, 1, escapeProgress));
+      }
+      
+      sprite.material.opacity = opacity;
 
       if (sprite.position.y > p.yTop) {
-        // “Brotado” continuo: respawn más espaciado (debajo del borde inferior),
-        // así no aparecen en grupo aunque varias desaparezcan cerca en el tiempo.
-        const spacing = p.spawnSpacing ?? (p.yTop - p.yBottom) / Math.max(1, count);
-        sprite.position.y = p.yBottom - rand(0.6, 2.4) * spacing;
-        // Evitar acumulación: mantener el carril fijo; solo re-jitter leve
-        p.xJitter = rand(-0.45, 0.45);
-        sprite.position.x = (p.laneBaseX ?? 0) + p.xJitter;
-        p.baseZ = rand(zMin, zMax);
-        sprite.position.z = p.baseZ;
-        if (p.repulse) p.repulse.set(0, 0);
-        if (p.repulseVel) p.repulseVel.set(0, 0);
+        // Solo respawnear si NO estamos en la zona de fade (sino dejarlas escapar)
+        if (!inFadeZone) {
+          // "Brotado" continuo: respawn más espaciado (debajo del borde inferior),
+          // así no aparecen en grupo aunque varias desaparezcan cerca en el tiempo.
+          const spacing = p.spawnSpacing ?? (p.yTop - p.yBottom) / Math.max(1, count);
+          sprite.position.y = p.yBottom - rand(0.6, 2.4) * spacing;
+          // Evitar acumulación: mantener el carril fijo; solo re-jitter leve
+          p.xJitter = rand(-0.45, 0.45);
+          sprite.position.x = (p.laneBaseX ?? 0) + p.xJitter;
+          p.baseZ = rand(zMin, zMax);
+          sprite.position.z = p.baseZ;
+          if (p.repulse) p.repulse.set(0, 0);
+          if (p.repulseVel) p.repulseVel.set(0, 0);
 
-        // Re-seed look para mantener variedad (tamaño/velocidad/rotación)
-        const z = pickZ({ zMin, zMax });
-        p.depth01 = clamp01((z - zMax) / (zMin - zMax));
-        p.baseZ = z;
-        sprite.position.z = z;
+          // Re-seed look para mantener variedad (tamaño/velocidad/rotación)
+          const z = pickZ({ zMin, zMax });
+          p.depth01 = clamp01((z - zMax) / (zMin - zMax));
+          p.baseZ = z;
+          sprite.position.z = z;
 
-        const baseScale = Math.max(0.65, Math.min(1.05, vpAtZ.width / 22));
-        const tierPick = Math.random();
-        const tier = tierPick < 0.2 ? 1.25 : tierPick < 0.65 ? 1.0 : 0.82;
-        const depthScale = lerp(1.2, 0.85, p.depth01);
-        p.scale = baseScale * tier * depthScale * rand(0.92, 1.12);
-        sprite.scale.set(p.scale, p.scale, 1);
+          const baseScale = Math.max(0.65, Math.min(1.05, vpAtZ.width / 22));
+          const tierPick = Math.random();
+          const tier = tierPick < 0.2 ? 1.25 : tierPick < 0.65 ? 1.0 : 0.82;
+          const depthScale = lerp(1.2, 0.85, p.depth01);
+          p.scale = baseScale * tier * depthScale * rand(0.92, 1.12);
+          sprite.scale.set(p.scale, p.scale, 1);
 
-        const rotBase = lerp(0.05, 0.18, 1 - p.depth01) * lerp(0.9, 1.25, tierPick);
-        p.rotSpeed = rotBase * (Math.random() < 0.5 ? -1 : 1);
+          const rotBase = lerp(0.05, 0.18, 1 - p.depth01) * lerp(0.9, 1.25, tierPick);
+          p.rotSpeed = rotBase * (Math.random() < 0.5 ? -1 : 1);
 
-        p.speed = lerp(0.55, 0.9, 1 - p.depth01) * rand(0.92, 1.08);
-        p.wobble = lerp(0.09, 0.03, p.depth01) * rand(0.85, 1.15);
-        p.opacityBase = lerp(0.98, 0.75, p.depth01) * rand(0.92, 1.0);
+          p.speed = lerp(0.75, 1.2, 1 - p.depth01) * rand(0.92, 1.08); // Aumentado de (0.55, 0.9) a (0.75, 1.2)
+          p.wobble = lerp(0.09, 0.03, p.depth01) * rand(0.85, 1.15);
+          p.opacityBase = lerp(0.98, 0.75, p.depth01) * rand(0.92, 1.0);
 
-        // Cambiar icono al respawn (sin re-render): actualizamos el map del material directamente
-        if (Math.random() < 0.7) {
-          const nextIdx = randInt(0, ICON_URLS.length - 1);
-          p.iconIdx = nextIdx;
-          if (sprite.material?.map !== textures[nextIdx]) {
-            sprite.material.map = textures[nextIdx];
-            sprite.material.needsUpdate = true;
+          // Cambiar icono al respawn (sin re-render): actualizamos el map del material directamente
+          if (Math.random() < 0.7) {
+            const nextIdx = randInt(0, ICON_URLS.length - 1);
+            p.iconIdx = nextIdx;
+            if (sprite.material?.map !== textures[nextIdx]) {
+              sprite.material.map = textures[nextIdx];
+              sprite.material.needsUpdate = true;
+            }
           }
-        }
-      }
-    }
-  });
+        } // Cierre del if (!inFadeZone)
+      } // Cierre del if (sprite.position.y > p.yTop)
+    } // Cierre del for loop
+  }); // Cierre del useFrame
 
   // No renderizar nada hasta que la moneda haya aterrizado
   if (!coinHasLanded) return null;

@@ -7,14 +7,14 @@ import { AppContext } from "../../../context/AppContext";
 
 const GlassGroup =  memo(({ activeInfo, sectionHover }) => {
 
-  const { scrollProgress } = useContext(AppContext)
+  const { scrollProgress, isLeavingOptions } = useContext(AppContext)
 
 
   return (
     <div>
       <div className="glass-layer red-glass">
         <AnimatePresence mode="wait">
-          {!activeInfo && scrollProgress < 0.47 && (
+          {!activeInfo && scrollProgress < 0.47 && !isLeavingOptions && (
             <motion.div
 
               initial={{ opacity: 0, x: -200, transition: { duration: 0.5 } }}
@@ -29,7 +29,7 @@ const GlassGroup =  memo(({ activeInfo, sectionHover }) => {
 
       <div className="glass-layer green-glass">
         <AnimatePresence mode="wait">
-          {!activeInfo && scrollProgress < 0.49 && (
+          {!activeInfo && scrollProgress < 0.49 && !isLeavingOptions && (
             <motion.div
               className="glass-align-right"
               initial={{ opacity: 0, y: -200, transition: { duration: 0.5 } }}
@@ -44,7 +44,7 @@ const GlassGroup =  memo(({ activeInfo, sectionHover }) => {
 
       <div className="glass-layer blue-glass">
         <AnimatePresence mode="wait">
-          {!activeInfo && scrollProgress < 0.52 && (
+          {!activeInfo && scrollProgress < 0.52 && !isLeavingOptions && (
             <motion.div
               initial={{ opacity: 0, y: 200, transition: { duration: 0.5 } }}
               exit={{ opacity: 0, y: 200, transition: { duration: 1 } }}

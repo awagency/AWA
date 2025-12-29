@@ -31,6 +31,7 @@ export const AppProvider = ({ children }) => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [coinHasLanded, setCoinHasLanded] = useState(false);
+  const [isLeavingOptions, setIsLeavingOptions] = useState(false);
 
 
   useEffect(() => {
@@ -210,9 +211,11 @@ export const AppProvider = ({ children }) => {
       isLoading,
       loadingProgress,
       coinHasLanded,
-      setCoinHasLanded
+      setCoinHasLanded,
+      isLeavingOptions,
+      setIsLeavingOptions
     }),
-    [scrollProgress, cameraTarget, cameraLookAtTarget, activeInfo, contactModal, isLoading, loadingProgress, coinHasLanded]
+    [scrollProgress, cameraTarget, cameraLookAtTarget, activeInfo, contactModal, isLoading, loadingProgress, coinHasLanded, isLeavingOptions]
   );
 
   return (
