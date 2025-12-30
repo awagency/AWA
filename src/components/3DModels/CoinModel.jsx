@@ -7,10 +7,20 @@ import { AppContext } from "../../context/AppContext";
 
 const COIN_LIGHT_LAYER = 1;
 
+// =========================
+// VELOCIDADES DE MOVIMIENTO
+// =========================
+const FALL_SPEED = 0.012;     // caída inicial
+const ENTRY_SPEED = 0.02;    // 🔹 primer desplazamiento lateral
+const MOVE_SPEED = 0.02;      // recorrido general
+const FINAL_SPEED = 0.04;     // salida final
+const ENTRY_SCROLL_LIMIT = 0.08;
+// =========================
+
 const tempMatrix = new THREE.Matrix4();
 const tempQuat = new THREE.Quaternion();
 const offsetQuat = new THREE.Quaternion().setFromEuler(
-  new THREE.Euler(0, Math.PI / 2, 0) // 🔴 CORRECCIÓN DE PERFIL → FRENTE
+  new THREE.Euler(0, Math.PI / 2, 0)
 );
 
 const getResponsiveScale = () => {
@@ -32,6 +42,9 @@ export const CoinModel = ({ scrollProgress }) => {
   const startPosition = new THREE.Vector3(2.5, 15, -3);
   const centerPosition = new THREE.Vector3(0, 0, -3);
 
+  // 🔹 nueva posición explícita de entrada
+  const entryPosition = new THREE.Vector3(2.6, 0, -2);
+
   const targetPosition = useRef(new THREE.Vector3());
 
   useEffect(() => {
@@ -41,7 +54,6 @@ export const CoinModel = ({ scrollProgress }) => {
           obj.layers.enable(COIN_LIGHT_LAYER);
           obj.castShadow = true;
           obj.receiveShadow = true;
-          obj.renderOrder = 0;
 
           const mats = Array.isArray(obj.material)
             ? obj.material
@@ -49,16 +61,14 @@ export const CoinModel = ({ scrollProgress }) => {
 
           mats.forEach((m) => {
             if (!m) return;
-            if (typeof m.metalness === "number")
-              m.metalness = Math.max(m.metalness, 0.92);
-            if (typeof m.roughness === "number")
-              m.roughness = Math.min(m.roughness, 0.28);
-            if (typeof m.envMapIntensity === "number")
-              m.envMapIntensity = Math.max(m.envMapIntensity, 2.7);
-            if (typeof m.clearcoat === "number")
-              m.clearcoat = Math.max(m.clearcoat, 0.55);
-            if (typeof m.clearcoatRoughness === "number")
-              m.clearcoatRoughness = Math.min(m.clearcoatRoughness, 0.15);
+            m.metalness = Math.max(m.metalness ?? 0, 0.92);
+            m.roughness = Math.min(m.roughness ?? 1, 0.28);
+            m.envMapIntensity = Math.max(m.envMapIntensity ?? 1, 2.7);
+            m.clearcoat = Math.max(m.clearcoat ?? 0, 0.55);
+            m.clearcoatRoughness = Math.min(
+              m.clearcoatRoughness ?? 1,
+              0.15
+            );
             m.needsUpdate = true;
           });
         }
@@ -87,57 +97,50 @@ export const CoinModel = ({ scrollProgress }) => {
   useFrame((state, delta) => {
     if (!ref.current) return;
 
-    // =================================================
-    // 🔴 INFO ACTIVA → QUIETA + MIRANDO DE FRENTE
-    // =================================================
+    // =========================
+    // INFO ACTIVA
+    // =========================
     if (activeInfo) {
       tempMatrix.lookAt(
         ref.current.position,
         camera.position,
         ref.current.up
       );
-
       tempQuat.setFromRotationMatrix(tempMatrix);
-
-      // 👉 aplicar corrección de eje del modelo
       tempQuat.multiply(offsetQuat);
-
       ref.current.quaternion.slerp(tempQuat, 0.08);
       return;
     }
 
-    if (ref.current && !isManuallyMoved) {
+    if (!isManuallyMoved) {
       // =========================
       // ESCALA
       // =========================
       if (scrollProgress >= 0.9) {
         const scaleFactor = 1 + (scrollProgress - 0.9) * 2500;
-        const newScale = new THREE.Vector3(
-          scaleFactor,
-          scaleFactor,
-          scaleFactor
+        ref.current.scale.lerp(
+          new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor),
+          0.05
         );
-        ref.current.scale.lerp(newScale, 0.05);
       } else {
-        const responsiveScale = getResponsiveScale();
-        const newScaleResponsive = new THREE.Vector3(
-          responsiveScale,
-          responsiveScale,
-          responsiveScale
-        );
-        ref.current.scale.lerp(newScaleResponsive, 0.1);
+        const s = getResponsiveScale();
+        ref.current.scale.lerp(new THREE.Vector3(s, s, s), 0.1);
       }
 
       // =========================
       // POSICIÓN
       // =========================
       if (!hasLanded) {
-        ref.current.position.lerp(centerPosition, 0.01);
-        if (ref.current.position.distanceTo(centerPosition) < 0.1) {
-          setHasLanded(true);
-          setCoinHasLanded?.(true);
-        }
-      } else {
+        ref.current.position.lerp(centerPosition, FALL_SPEED);
+      }
+
+      // 🔹 TRAMO INICIAL CONTROLADO
+      else if (scrollProgress < ENTRY_SCROLL_LIMIT) {
+        ref.current.position.lerp(entryPosition, ENTRY_SPEED);
+      }
+
+      // 🔹 LÓGICA ORIGINAL DE SCROLL
+      else {
         const isFinalSection = scrollProgress >= 0.4;
 
         if (!isFinalSection) {
@@ -164,15 +167,20 @@ export const CoinModel = ({ scrollProgress }) => {
             easedProgress
           );
 
-          ref.current.position.lerp(targetPosition.current, 0.02);
+          ref.current.position.lerp(
+            targetPosition.current,
+            MOVE_SPEED
+          );
         } else {
-          const finalPosition = new THREE.Vector3(0, 0, 10);
-          ref.current.position.lerp(finalPosition, 0.05);
+          ref.current.position.lerp(
+            new THREE.Vector3(0, 0, 10),
+            FINAL_SPEED
+          );
         }
       }
 
       // =========================
-      // ROTACIÓN NORMAL
+      // ROTACIÓN
       // =========================
       ref.current.rotation.y += delta * 0.5;
       ref.current.rotation.x += delta * 0.2;

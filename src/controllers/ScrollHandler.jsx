@@ -17,7 +17,7 @@ export const ScrollHandler = () => {
       const startProgress =
         window.scrollY / (document.body.scrollHeight - window.innerHeight);
       const distance = targetProgress - startProgress;
-      const duration = 3000; // Más lenta y pareja en ambas direcciones
+      const duration = 1000; // Más lenta y pareja en ambas direcciones
       let startTime = null;
 
       const animateScroll = (timestamp) => {
