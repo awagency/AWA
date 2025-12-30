@@ -1,0 +1,137 @@
+.feature-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-top: -40px; /* Overlap vertical - se enciman los hexágonos */
+  min-height: 120px;
+}
+
+/* Evitar margin negativo en el primer elemento */
+.feature-item--first {
+  margin-top: 0;
+}
+
+/* Hexágono a la izquierda */
+.feature-item--left {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+/* Hexágono a la derecha */
+.feature-item--right {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+/* Contenedor del hexágono */
+.feature-item__hexagon-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hexágono como imagen */
+.feature-item__hexagon {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Texto alineado con el hexágono */
+.feature-item__text {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.6;
+  flex: 1;
+  padding: 0 1.5rem;
+  z-index: 0;
+}
+
+/* Ajuste de padding según posición */
+.feature-item--left .feature-item__text {
+  padding-left: 2rem;
+  padding-right: 0;
+  text-align: left;
+}
+
+.feature-item--right .feature-item__text {
+  padding-right: 2rem;
+  padding-left: 0;
+  text-align: right;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  .feature-item__hexagon-wrapper {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .feature-item {
+    margin-top: -30px;
+    min-height: 100px;
+  }
+  
+  .feature-item__text {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .feature-item {
+    flex-direction: column;
+    text-align: center;
+    margin-top: -20px;
+    min-height: auto;
+    padding: 1rem 0;
+  }
+  
+  .feature-item--first {
+    margin-top: 0;
+  }
+  
+  .feature-item--left,
+  .feature-item--right {
+    flex-direction: column;
+  }
+  
+  .feature-item__hexagon-wrapper {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-item__text {
+    font-size: 0.95rem;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+/* Responsive - Mobile pequeño */
+@media (max-width: 480px) {
+  .feature-item__hexagon-wrapper {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .feature-item {
+    margin-top: -15px;
+  }
+  
+  .feature-item__text {
+    font-size: 0.875rem;
+  }
+}
+

@@ -1,49 +1,71 @@
 import { motion } from "motion/react";
-import { Buttons } from '../../Buttons';
-import useSectionGroupService from '../hooks/useSectionGroupService';
-import { getTextContent } from '../handles';
+import useSectionGroupService from "../hooks/useSectionGroupService";
 import { SectionData } from "../data/data";
 
-const Section = ({ handleBack,position = "right",section = "EMPRESA" }) => {
+import FeaturesList from "../../../../hexagon/FeaturesList";
+import HeroFeatureCard from "../../../../hexagon/HeroFeatureCard";
 
-    const { currentText, handleButtonClick } = useSectionGroupService()
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, transition: { duration: 2 } }}
-            animate={{ opacity: 1, transition: { duration: 2 } }}
-            className={`motion-section ${position}`}
-        >
-            <motion.div style={{ position: "fixed", top: 0, right: 0, width: "100vw", height: "100vh", zIndex: 1 }}>
-                <img className="section-img" src={SectionData[section].background} />
-            </motion.div>
-            <div className="section-content">
-                <img
-                    onClick={handleBack}
-                    className="back-arrow"
-                    src="/BackArrowWhite.svg"
-                />
-                <img className="section-title-img" src={SectionData[section].title} />
-                <motion.div
-                    key={`empresa-${currentText}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 ,transition: { duration: 2 }}}
-                    exit={{ opacity: 0 }}
-                    // transition={{ duration: 2 }}
-                    className="section-text"
-                >
-                    <p className="section-heading">{SectionData[section].heading[currentText]}</p>
-                    {SectionData[section].description[currentText]()}
+const Section = ({ handleBack, position = "right", section }) => {
+  const { currentText, handleButtonClick } = useSectionGroupService();
+  const data = SectionData[section];
 
-                </motion.div>
-                <div className="button-wrapper">
-                    <Buttons onClick={() => handleButtonClick(section)}
-                        onDesclick={() => handleButtonClick(`${section}2`)}
-                        gradient={section} />
-                </div>
-            </div>
-        </motion.div>
-    );
+  const activeFeature =
+    data.features.find(f => f.id === currentText) || data.features[0];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={`motion-section ${position}`}
+    >
+    <motion.div
+  style={{
+    position: "fixed",
+    inset: 0,
+    zIndex: 0,
+    pointerEvents: "none" // 🔑 CLAVE
+  }}
+>
+  <img
+    className="section-img"
+    src={SectionData[section].background}
+    style={{
+      width: "100%",
+      height: "100%",
+      objectFit: "cover"
+    }}
+  />
+</motion.div>
+
+
+      <div className="section-content">
+        <img
+          onClick={handleBack}
+          className="back-arrow"
+          src="/BackArrowWhite.svg"
+        />
+
+        <img className="section-title-img" src={data.title} />
+
+        <div className="section-block">
+          <div className="section-block__body">
+            <FeaturesList
+              features={data.features}
+              activeId={activeFeature.id}
+              onSelect={handleButtonClick}
+            />
+
+            <HeroFeatureCard
+              title={activeFeature.hero.title}
+              description={activeFeature.hero.description}
+              image={activeFeature.hero.image}
+            />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
 };
 
 export default Section;

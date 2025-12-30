@@ -1,0 +1,103 @@
+/* ===============================
+   VARIABLES DE CONTROL FINO
+================================ */
+:root {
+  --feature-item-height: 50px;      /* altura de cada fila */
+  --feature-overlap: 8px;         /* superposición vertical */
+  --feature-zigzag-x: 28px;         /* zigzag icono/texto */
+  --feature-text-offset-x: -85px;  /* ⬅ SOLO textos */
+
+  --feature-icon-size: 80px;        /* ⬅ TAMAÑO VISUAL DEL ICONO */
+}
+
+/* ===============================
+   COMPONENTE PRINCIPAL
+   MAX 400 x 400
+================================ */
+.features {
+  display: flex;
+  flex-direction: row;
+  width: 400px;
+  height: 400px;
+  gap: 20px;
+}
+
+/* ===============================
+   COLUMNA DE ICONOS
+================================ */
+.features__icons {
+  width: 150px;
+  min-width: 150px;
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.icon-item {
+  height: var(--feature-item-height);
+  margin-top: var(--feature-overlap);
+  display: flex;
+  align-items: center;
+}
+
+.icon-first {
+  margin-top: 0;
+}
+
+.icon-left {
+  transform: translateX(0);
+}
+
+.icon-right {
+  transform: translateX(var(--feature-zigzag-x));
+}
+
+/* 🔑 ICONO AGRANDADO SIN AFECTAR LAYOUT */
+.icon-item img {
+  width: var(--feature-icon-size);
+  height: var(--feature-icon-size);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ===============================
+   COLUMNA DE TEXTOS
+   (AJUSTE HORIZONTAL AISLADO)
+================================ */
+.features__texts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+
+  /* ⬅ movimiento independiente de textos */
+  transform: translateX(var(--feature-text-offset-x));
+}
+
+.text-item {
+  height: var(--feature-item-height);
+  margin-top: var(--feature-overlap);
+
+  display: flex;
+  align-items: center;
+
+  font-size: 20px;
+  font-weight: 350;
+  line-height: 1.35;
+  color: #2d3748;
+}
+
+.text-first {
+  margin-top: 0;
+}
+
+/* Zigzag espejo */
+.text-left {
+  padding-left: 0;
+}
+
+.text-right {
+  padding-left: var(--feature-zigzag-x);
+}

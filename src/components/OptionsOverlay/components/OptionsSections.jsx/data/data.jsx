@@ -1,68 +1,96 @@
 export const SectionData = {
     EMPRESA: {
-        background: "/fondoEmp.webp",
-        title: "/EmpresaTitle.png",
-        heading: {
-            initial: "Simplifica su gestión",
-            secondary: " "
+      background: "/fondoEmp.webp",
+      title: "/EmpresaTitle.png",
+  
+      features: [
+        {
+          id: "automation",
+          hexIcon: "/hex/empresa/automation.png",
+          text: "Reducí pasos de entrega",
+          hero: {
+            title: "Automatización inteligente",
+            description: "Optimizamos procesos reales reduciendo carga operativa y errores.",
+            image: "/hex/empresa/automation-big.png"
+          }
         },
-        description: {
-            initial: () => (
-                <p className="section-description">
-                    <strong>Delegá proyectos completos, o la selección y supervisión de tus profesionales. </strong>Fortalecé tus puntos débiles con nuestras <strong>consultorías,</strong> o revalidá procesos en una <strong>auditoría.</strong>Incorporá <strong>automatización inteligente</strong> para reducir la carga operativa y tener un control total y mas eficiente.
-                </p>
-
-            ),
-            secondary: () => (
-                <p className="section-description">
-                    Nos integramos como
-                    <strong>una extensión de tu equipo: </strong>flexible, eficiente y sin ataduras. Evitamos la carga de gestionar recursos internos y tambien ofrecemos automatizaciones  inteligentes, que ademas de
-                    <strong> simplificar y reducir costos,</strong> potencian los resultados.
-                </p>
-            )
-        }
-    },
-    EXCLUSIVO: {
-        title: "/ExclusivoTitle.png",
-        background: "/fondoExc.webp",
-        heading: {
-            initial: "Tecnologia Inteligente",
-            secondary: " "
+        {
+          id: "delegation",
+          hexIcon: "/hex/empresa/delegation.png",
+          text: "Delegá tareas y proyectos",
+          hero: {
+            title: "Delegación estratégica",
+            description: "Nos integramos como una extensión flexible de tu equipo.",
+            image: "/hex/empresa/delegation-big.png"
+          }
         },
-        description: {
-            initial: () => (
-                <p className="section-description">
-                    <strong>Creamos Webs, Apps y herramientas,</strong> no solo con un <strong>diseño estratégico,</strong> sino con <strong>funcionalidades avanzadas</strong> que <strong>automatizan tareas reales.</strong>  Desde atender a tus usuarios, hasta gestionar stock, ventas y procesos más <strong>específicos o complejos.</strong>
-                </p>
-
-            ),
-            secondary: () => (
-                <p className="section-description">
-                    Detrás de cada trabajo hay una estructura diseñada para maximizar la experiencia del público de nuestros clientes, mientras
-                    <strong>integramos automatizaciones inteligentes que optimizan su trabajo diario.</strong> Así, pueden enfocarse en hacer crecer su marca, negocio o exmpresa sin limites.
-                </p>
-            )
+        {
+          id: "scale",
+          hexIcon: "/hex/empresa/scale.png",
+          text: "Expandite sin límites",
+          hero: {
+            title: "Escalabilidad real",
+            description: "Crecé sin sumar complejidad estructural.",
+            image: "/hex/empresa/scale-big.png"
+          }
         }
+      ]
     },
+  
     PROFESIONAL: {
-        title: "/ProTitle.png",
-        background: "/fondoPro.webp",
-        heading: {
-            initial: "Impulsa tu carrera",
-            secondary: " "
+      background: "/fondoPro.webp",
+      title: "/ProTitle.png",
+  
+      features: [
+        {
+          id: "network",
+          hexIcon: "/hex/pro/network.png",
+          text: "Conectá con oportunidades",
+          hero: {
+            title: "Networking profesional",
+            description: "Accedé a proyectos y equipos alineados a tu perfil.",
+            image: "/hex/pro/network-big.png"
+          }
         },
-        description: {
-            initial: () => (
-                <p className="section-description">
-                    Creamos un modelo de trabajo en colavoracion, para conectar oportunidades con nuestra red de profesionales, potenciando el crecimiento en mayoria y fomentando en su capacitacion las nuevas tecnologias.
-                </p>
-
-            ),
-            secondary: () => (
-                <p className="section-description">
-                    Forma parte de un ecosistema colaborativo donde los profesionales IT pueden compartir, delegar tareas y aprender unos de otros. Optimiza tu carga de trabajo, gestiona proyectos de forma eficiente y accede a oportunidades internacionales.
-                </p>
-            )
+        {
+          id: "growth",
+          hexIcon: "/hex/pro/growth.png",
+          text: "Impulsá tu carrera",
+          hero: {
+            title: "Crecimiento continuo",
+            description: "Capacitación y colaboración en un ecosistema real.",
+            image: "/hex/pro/growth-big.png"
+          }
         }
+      ]
+    },
+  
+    EXCLUSIVO: {
+      background: "/fondoExc.webp",
+      title: "/ExclusivoTitle.png",
+  
+      features: [
+        {
+          id: "custom",
+          hexIcon: "/hex/exclusive/custom.png",
+          text: "Soluciones a medida",
+          hero: {
+            title: "Producto exclusivo",
+            description: "Diseño y desarrollo sin plantillas.",
+            image: "/hex/exclusive/custom-big.png"
+          }
+        },
+        {
+          id: "ai",
+          hexIcon: "/hex/exclusive/ai.png",
+          text: "IA aplicada",
+          hero: {
+            title: "Automatización avanzada",
+            description: "IA integrada a procesos reales.",
+            image: "/hex/exclusive/ai-big.png"
+          }
+        }
+      ]
     }
-}
+  }
+  

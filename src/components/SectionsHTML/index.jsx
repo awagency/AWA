@@ -7,6 +7,8 @@ import { OptionsOverlay } from "../OptionsOverlay/OptionsOverlay";
 import { BladesAndReveal } from "../BladesAndReveal/BladesAndReveal";
 import ServiceCards from "../ServicesCards/ServiceCards";
 import ContactForm from "../ContactForm";
+import HomeSection from "../HomeSection/HomeSection";
+import SecondSection from "../SecondSection/SecondSection";
 
 const SectionsHTML = () => {
   const {
@@ -23,8 +25,19 @@ const SectionsHTML = () => {
   }, [contactModal]);
 
   const { isInSection } = useScrollManager(setScrollProgress);
+  
+  // Mostrar HomeSection cuando la moneda está en la primera posición (después del loader)
+  const showHomeSection = scrollProgress >= 0 && scrollProgress < 0.2;
+  
+  // Mostrar SecondSection cuando la moneda está en la segunda posición (lado izquierdo)
+  // Mostrarla desde antes y después para los efectos de transición (incluye retorno desde sección 3)
+  const showSecondSection = scrollProgress >= 0.05 && scrollProgress < 0.65;
+  
   return (
     <>
+      {showHomeSection && <HomeSection />}
+      {showSecondSection && <SecondSection />}
+      
       {isInSection("TITLES")(scrollProgress) && (
         <FirstText
           sectionRange={SCROLL_RANGES.SECTIONS.TITLES}
