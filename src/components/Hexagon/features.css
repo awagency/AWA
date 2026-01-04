@@ -1,0 +1,192 @@
+/* =============================== VARIABLES ================================ */
+:root {
+  --feature-item-height: 32px;   /* antes 50px */
+  --feature-overlap: 14px;       /* antes 8px */
+
+  /* zigzag apenas más sutil */
+  --feature-zigzag-x: 22px;
+
+  /* textos un poco más cerca */
+  --feature-text-offset-x: -70px;
+
+  /* 🔽 iconos un poco más chicos */
+  --feature-icon-size: 68px;
+}
+
+/* =============================== FEATURES WRAPPER ================================ */
+.features {
+  display: flex;
+  flex-direction: row;
+
+  width: 340px;
+  height: auto;        /* ✅ */
+  align-items: flex-start;
+
+  gap: 16px;
+}
+
+
+/* =============================== ICON COLUMN ================================ */
+.features__icons {
+  width: 120px;
+  min-width: 120px;
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.icon-item {
+  height: var(--feature-item-height);
+  margin-top: var(--feature-overlap);
+  display: flex;
+  align-items: center;
+}
+
+.icon-first {
+  margin-top: 0;
+}
+
+.icon-left {
+  transform: translateX(0);
+}
+
+.icon-right {
+  transform: translateX(var(--feature-zigzag-x));
+}
+
+.icon-item img {
+  width: var(--feature-icon-size);
+  height: var(--feature-icon-size);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* =============================== TEXT COLUMN ================================ */
+.features__texts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+
+  transform: translateX(var(--feature-text-offset-x));
+}
+
+.text-item {
+  height: var(--feature-item-height);
+  margin-top: var(--feature-overlap);
+  display: flex;
+  align-items: center;
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  color: #2d3748;
+
+  /* 🔐 BLOQUEO A UNA SOLA LÍNEA */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.text-first {
+  margin-top: 0;
+}
+
+.text-left {
+  padding-left: 0;
+}
+
+.text-right {
+  padding-left: var(--feature-zigzag-x);
+}
+
+/* =============================== FEATURE ITEM (NO USADO EN ESTE CASO) ================================ */
+/* ⛔️ Se deja intacto para no romper otros usos */
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-top: -40px;
+  min-height: 120px;
+}
+
+.feature-item--first {
+  margin-top: 0;
+}
+
+.feature-item--left {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.feature-item--right {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.feature-item__hexagon-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-item__hexagon {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.feature-item__text {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #2d3748;
+  margin: 0;
+  line-height: 1.6;
+  flex: 1;
+  padding: 0 1.5rem;
+  z-index: 0;
+}
+
+/* =============================== RESPONSIVE ================================ */
+@media (max-width: 1024px) {
+  .icon-item img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .text-item {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 768px) {
+  .features {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .features__icons,
+  .features__texts {
+    transform: none;
+  }
+
+  .icon-item {
+    justify-content: center;
+  }
+
+  .text-item {
+    justify-content: center;
+    text-align: center;
+    padding: 0;
+  }
+}

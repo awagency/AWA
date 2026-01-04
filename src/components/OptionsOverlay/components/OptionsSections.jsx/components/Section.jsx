@@ -1,10 +1,9 @@
 import { motion } from "motion/react";
 import useSectionGroupService from "../hooks/useSectionGroupService";
 import { SectionData } from "../data/data";
-
 import FeaturesList from "../../../../hexagon/FeaturesList";
 import HeroFeatureCard from "../../../../hexagon/HeroFeatureCard";
-
+import "./Section.css";
 
 const Section = ({ handleBack, position = "right", section }) => {
   const { currentText, handleButtonClick } = useSectionGroupService();
@@ -19,51 +18,45 @@ const Section = ({ handleBack, position = "right", section }) => {
       animate={{ opacity: 1 }}
       className={`motion-section ${position}`}
     >
-    <motion.div
-  style={{
-    position: "fixed",
-    inset: 0,
-    zIndex: 0,
-    pointerEvents: "none" // 🔑 CLAVE
-  }}
->
-  <img
-    className="section-img"
-    src={SectionData[section].background}
-    style={{
-      width: "100%",
-      height: "100%",
-      objectFit: "cover"
-    }}
-  />
-</motion.div>
-
+      {/* FONDO */}
+      <div className="section-bg">
+        <img src={data.background} alt="" />
+      </div>
 
       <div className="section-content">
+  <div className="section-inner">
+   
         <img
           onClick={handleBack}
           className="back-arrow"
           src="/BackArrowWhite.svg"
+          alt="Volver"
         />
 
-        <img className="section-title-img" src={data.title} />
+        {/* TÍTULO REAL */}
+        <header className="section-header">
+          <h1>{data.ui.title}</h1>
+          <p>{data.ui.subtitle}</p>
+        </header>
 
-        <div className="section-block">
-          <div className="section-block__body">
-            <FeaturesList
-              features={data.features}
-              activeId={activeFeature.id}
-              onSelect={handleButtonClick}
-            />
+        {/* CUERPO */}
+        <div className="section-layout">
+          {/* IZQUIERDA — SIEMPRE TODOS */}
+          <FeaturesList
+            features={data.features}
+            activeId={activeFeature.id}
+            onSelect={handleButtonClick}
+          />
 
-            <HeroFeatureCard
-              title={activeFeature.hero.title}
-              description={activeFeature.hero.description}
-              image={activeFeature.hero.image}
-            />
-          </div>
+          {/* DERECHA — MISMO HEXÁGONO */}
+          <HeroFeatureCard
+            title={activeFeature.hero.title}
+            description={activeFeature.hero.description}
+            image="/hexagono.png"
+          />
         </div>
-      </div>
+        </div>
+        </div>
     </motion.div>
   );
 };

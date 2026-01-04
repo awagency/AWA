@@ -1,96 +1,77 @@
 export const SectionData = {
-    EMPRESA: {
-      background: "/fondoEmp.webp",
-      title: "/EmpresaTitle.png",
-  
-      features: [
-        {
-          id: "automation",
-          hexIcon: "/hex/empresa/automation.png",
-          text: "Reducí pasos de entrega",
-          hero: {
-            title: "Automatización inteligente",
-            description: "Optimizamos procesos reales reduciendo carga operativa y errores.",
-            image: "/hex/empresa/automation-big.png"
-          }
-        },
-        {
-          id: "delegation",
-          hexIcon: "/hex/empresa/delegation.png",
-          text: "Delegá tareas y proyectos",
-          hero: {
-            title: "Delegación estratégica",
-            description: "Nos integramos como una extensión flexible de tu equipo.",
-            image: "/hex/empresa/delegation-big.png"
-          }
-        },
-        {
-          id: "scale",
-          hexIcon: "/hex/empresa/scale.png",
-          text: "Expandite sin límites",
-          hero: {
-            title: "Escalabilidad real",
-            description: "Crecé sin sumar complejidad estructural.",
-            image: "/hex/empresa/scale-big.png"
-          }
-        }
-      ]
+  EMPRESA: {
+    background: "/fondoEmp.webp",
+    ui: {
+      title: "Empresas IT",
+      subtitle: "Simplificá tu gestión con nuestro apoyo"
     },
-  
-    PROFESIONAL: {
-      background: "/fondoPro.webp",
-      title: "/ProTitle.png",
-  
-      features: [
-        {
-          id: "network",
-          hexIcon: "/hex/pro/network.png",
-          text: "Conectá con oportunidades",
-          hero: {
-            title: "Networking profesional",
-            description: "Accedé a proyectos y equipos alineados a tu perfil.",
-            image: "/hex/pro/network-big.png"
-          }
-        },
-        {
-          id: "growth",
-          hexIcon: "/hex/pro/growth.png",
-          text: "Impulsá tu carrera",
-          hero: {
-            title: "Crecimiento continuo",
-            description: "Capacitación y colaboración en un ecosistema real.",
-            image: "/hex/pro/growth-big.png"
-          }
+    features: [
+      {
+        id: "delivery",
+        hexIcon: "/A1.png",
+        text: "Reducí plazos de entrega",
+        hero: {
+          title: "Entregas más rápidas",
+          description:
+            "Optimizamos flujos para acelerar tiempos sin perder calidad.",
+          image: "/A7.png"
         }
-      ]
-    },
-  
-    EXCLUSIVO: {
-      background: "/fondoExc.webp",
-      title: "/ExclusivoTitle.png",
-  
-      features: [
-        {
-          id: "custom",
-          hexIcon: "/hex/exclusive/custom.png",
-          text: "Soluciones a medida",
-          hero: {
-            title: "Producto exclusivo",
-            description: "Diseño y desarrollo sin plantillas.",
-            image: "/hex/exclusive/custom-big.png"
-          }
-        },
-        {
-          id: "ai",
-          hexIcon: "/hex/exclusive/ai.png",
-          text: "IA aplicada",
-          hero: {
-            title: "Automatización avanzada",
-            description: "IA integrada a procesos reales.",
-            image: "/hex/exclusive/ai-big.png"
-          }
+      },
+      {
+        id: "delegation",
+        hexIcon: "/A2.png",
+        text: "Delegá tareas y proyectos",
+        hero: {
+          title: "Delegación estratégica",
+          description:
+            "Nos integramos como una extensión flexible de tu equipo.",
+          image: "/A7.png"
         }
-      ]
-    }
+      },
+      {
+        id: "scale",
+        hexIcon: "/A3.png",
+        text: "Expandite sin límites",
+        hero: {
+          title: "Escalabilidad real",
+          description:
+            "Crecé sin sumar complejidad estructural.",
+          image: "/A7.png"
+        }
+      },
+      {
+        id: "talent",
+        hexIcon: "/A4.png",
+        text: "Accedé a talento especializado",
+        hero: {
+          title: "Talento on-demand",
+          description:
+            "Especialistas listos para integrarse cuando los necesitás.",
+          image: "/A7.png"
+        }
+      },
+      {
+        id: "bottlenecks",
+        hexIcon: "/A5.png",
+        text: "Evitá cuellos de botella",
+        hero: {
+          title: "Procesos fluidos",
+          description:
+            "Detectamos y eliminamos fricciones operativas.",
+          image: "/A7.png"
+        }
+      },
+      {
+        id: "risk",
+        hexIcon: "/A6.png",
+        text: "Bajá riesgos de producción",
+        hero: {
+          title: "Menos riesgos",
+          description:
+            "Mayor previsibilidad y control en cada etapa.",
+          image: "/A7.png"
+        }
+      }
+    ]
   }
-  
+};
