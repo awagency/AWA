@@ -25,7 +25,7 @@ export default function FeatureItem({
     >
       <div className="feature-item__hexagon-wrapper">
         <img
-          src={iconSrc || '/hexagono.png'}
+          src={iconSrc || '/A7.png'}
           alt=""
           className="feature-item__hexagon"
         />

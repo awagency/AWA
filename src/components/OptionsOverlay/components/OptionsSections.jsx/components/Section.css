@@ -40,23 +40,32 @@
   /* =========================
      HEADER
   ========================= */
-  .section-header {
-    max-width: 720px;
-    margin-bottom: 2.5rem;
-  }
-  
-  .section-header h1 {
-    font-size: 3rem;
-    font-weight: 600;
-    margin: 0;
-  }
-  
-  .section-header p {
-    margin-top: 0.75rem;
-    font-size: 1.125rem;
-    opacity: 0.85;
-  }
-  
+.section-header {
+  max-width: 720px;
+  margin-bottom: 2.5rem;
+}
+
+/* TÍTULO */
+.section-header h1 {
+  font-size: 3rem;
+  font-weight: 600;
+  margin: 0;
+
+  /* 🔑 negro fuerte pero elegante */
+  color: #1a202c;
+}
+
+/* SUBTÍTULO */
+.section-header p {
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+
+  /* 🔑 gris oscuro legible sobre blanco */
+  color: #4a5568;
+
+  opacity: 1; /* ❗ importante: no lo apagues más */
+}
+
   /* =========================
      LAYOUT PRINCIPAL
   ========================= */

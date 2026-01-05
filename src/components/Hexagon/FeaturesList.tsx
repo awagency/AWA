@@ -1,17 +1,22 @@
 import './features.css'
 
 export interface Feature {
-  hexIcon: string
-  text: string
+  id: string;
+  hexIcon: string;
+  text: string;
 }
 
 interface FeaturesListProps {
-  features: Feature[]
-  className?: string
+  features: Feature[];
+  onSelect: (id: string) => void;
+  activeId?: string;
+  className?: string;
 }
 
 export default function FeaturesList({
   features,
+  onSelect,
+  activeId,
   className = '',
 }: FeaturesListProps) {
   return (
@@ -19,12 +24,9 @@ export default function FeaturesList({
       <div className="features__icons">
         {features.map((feature, index) => (
           <div
-            key={index}
-            className={`icon-item ${
-              index % 2 === 0 ? 'icon-left' : 'icon-right'
-            } ${index === 0 ? 'icon-first' : ''}`}
+            key={feature.id}
+            className={`icon-item ${index % 2 === 0 ? 'icon-left' : 'icon-right'} ${index === 0 ? 'icon-first' : ''} ${feature.id === activeId ? 'icon-active' : ''}`}
           >
-            {/* 🔥 ACÁ ESTÁ LA CLAVE */}
             <img src={feature.hexIcon} alt="" />
           </div>
         ))}
@@ -33,15 +35,15 @@ export default function FeaturesList({
       <div className="features__texts">
         {features.map((feature, index) => (
           <div
-            key={index}
-            className={`text-item ${
-              index % 2 === 0 ? 'text-left' : 'text-right'
-            } ${index === 0 ? 'text-first' : ''}`}
+            key={feature.id}
+            className={`text-item ${index % 2 === 0 ? 'text-left' : 'text-right'} ${index === 0 ? 'text-first' : ''} ${feature.id === activeId ? 'text-active' : ''}`}
+            onClick={() => onSelect(feature.id)}
+            style={{ cursor: 'pointer' }}
           >
             {feature.text}
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }
