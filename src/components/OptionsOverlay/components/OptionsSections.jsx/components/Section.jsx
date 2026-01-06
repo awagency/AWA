@@ -9,27 +9,39 @@ export default function Section({ handleBack, position = "right", section }) {
   const data = SectionData[section];
   const allFeatures = data.features || [];
 
-  // Detalle inicial: A7
-  const initialActive = allFeatures.find(f => f.id === "A7") || allFeatures[allFeatures.length - 1];
+  const initialActive =
+    allFeatures.find(f => f.id === "A7") ||
+    allFeatures[allFeatures.length - 1];
 
-  // Lista lateral: todos menos el detalle
   const initialList = allFeatures.filter(f => f.id !== initialActive.id);
 
   const [activeFeature, setActiveFeature] = useState(initialActive);
   const [listFeatures, setListFeatures] = useState(initialList);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const handleButtonClick = (clickedId) => {
+    if (isTransitioning) return;
+
     const clickedIndex = listFeatures.findIndex(f => f.id === clickedId);
     if (clickedIndex === -1) return;
 
+    setIsTransitioning(true);
+
     const clickedFeature = listFeatures[clickedIndex];
 
-    // Intercambiamos contenido: el detalle pasa al lateral
-    const newList = [...listFeatures];
-    newList[clickedIndex] = activeFeature;
+    // ⏬ salida visual
+    setTimeout(() => {
+      const newList = [...listFeatures];
+      newList[clickedIndex] = activeFeature;
 
-    setActiveFeature(clickedFeature);
-    setListFeatures(newList);
+      setActiveFeature(clickedFeature);
+      setListFeatures(newList);
+    }, 300);
+
+    // ⏫ reactivamos tilt + idle
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 900);
   };
 
   return (
@@ -53,21 +65,19 @@ export default function Section({ handleBack, position = "right", section }) {
           </header>
 
           <div className="section-layout">
-            {/* Lista lateral: siempre 6 items */}
             <FeaturesList
               features={listFeatures}
               onSelect={handleButtonClick}
               activeId={activeFeature.id}
             />
 
-            {/* Detalle principal */}
             {activeFeature?.hero && (
               <HeroFeatureCard
-                key={activeFeature.id}
-                title={activeFeature.hero.title || ""}
-                subtitle={activeFeature.hero.subtitle || ""}
-                description={activeFeature.hero.description || ""}
-                image={activeFeature.hero.image || "/A7.png"}
+                key={activeFeature.id} // OBLIGATORIO
+                title={activeFeature.hero.title}
+                description={activeFeature.hero.description}
+                image={activeFeature.hero.image}
+                isTransitioning={isTransitioning}
               />
             )}
           </div>

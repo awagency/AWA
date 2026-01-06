@@ -1,37 +1,35 @@
 /* =============================== VARIABLES ================================ */
 :root {
-  --feature-item-height: 32px;   /* antes 50px */
-  --feature-overlap: 14px;       /* antes 8px */
+  /* 🔼 más alto cada ítem */
+  --feature-item-height: 44px;
 
-  /* zigzag apenas más sutil */
+  /* 🔼 más aire vertical entre ítems */
+  --feature-overlap: 18px;
+
+  /* zigzag intacto */
   --feature-zigzag-x: 22px;
 
-  /* textos un poco más cerca */
-  --feature-text-offset-x: -70px;
+  /* 🔼 más separación icono ↔ texto */
+  --feature-text-offset-x: -50px;
 
-  /* 🔽 iconos un poco más chicos */
-  --feature-icon-size: 68px;
+  /* 🔼 iconos más grandes */
+  --feature-icon-size: 82px;
 }
 
 /* =============================== FEATURES WRAPPER ================================ */
 .features {
   display: flex;
   flex-direction: row;
-
   width: 340px;
-  height: auto;        /* ✅ */
   align-items: flex-start;
-
   gap: 16px;
+  perspective: 900px;
 }
-
 
 /* =============================== ICON COLUMN ================================ */
 .features__icons {
   width: 120px;
   min-width: 120px;
-  flex-shrink: 0;
-
   display: flex;
   flex-direction: column;
   padding-top: 4px;
@@ -42,6 +40,7 @@
   margin-top: var(--feature-overlap);
   display: flex;
   align-items: center;
+  transform-style: preserve-3d;
 }
 
 .icon-first {
@@ -56,11 +55,15 @@
   transform: translateX(var(--feature-zigzag-x));
 }
 
-.icon-item img {
+.icon-img {
   width: var(--feature-icon-size);
   height: var(--feature-icon-size);
   object-fit: contain;
   pointer-events: none;
+  will-change: transform;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.3s ease;
 }
 
 /* =============================== TEXT COLUMN ================================ */
@@ -69,7 +72,6 @@
   display: flex;
   flex-direction: column;
   padding-top: 4px;
-
   transform: translateX(var(--feature-text-offset-x));
 }
 
@@ -78,88 +80,54 @@
   margin-top: var(--feature-overlap);
   display: flex;
   align-items: center;
-
   font-size: 16px;
   font-weight: 400;
-  line-height: 1;
   color: #2d3748;
-
-  /* 🔐 BLOQUEO A UNA SOLA LÍNEA */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.3s ease;
 }
-
 
 .text-first {
   margin-top: 0;
-}
-
-.text-left {
-  padding-left: 0;
 }
 
 .text-right {
   padding-left: var(--feature-zigzag-x);
 }
 
-/* =============================== FEATURE ITEM (NO USADO EN ESTE CASO) ================================ */
-/* ⛔️ Se deja intacto para no romper otros usos */
+/* =============================== HOVER SIN ROMPER ZIGZAG ================================ */
 
-.feature-item {
-  display: flex;
-  align-items: center;
-  position: relative;
-  margin-top: -40px;
-  min-height: 120px;
+/* Texto */
+.text-hovered {
+  transform: translateZ(24px) scale(1.03);
+  color: #0f172a;
 }
 
-.feature-item--first {
-  margin-top: 0;
+/* Icono (SOLO la imagen, nunca el contenedor) */
+.icon-hovered .icon-img {
+  transform: translateZ(24px) scale(1.06);
+  filter: brightness(1.08) contrast(1.05);
 }
 
-.feature-item--left {
-  flex-direction: row;
-  justify-content: flex-start;
-}
+/* =============================== ACTIVO ================================ */
 
-.feature-item--right {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-}
-
-.feature-item__hexagon-wrapper {
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.feature-item__hexagon {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.feature-item__text {
-  font-size: 1.125rem;
+.text-active {
   font-weight: 500;
-  color: #2d3748;
-  margin: 0;
-  line-height: 1.6;
-  flex: 1;
-  padding: 0 1.5rem;
-  z-index: 0;
+  color: #0f172a;
+}
+
+.icon-active .icon-img {
+  filter: brightness(1.05) contrast(1.05);
 }
 
 /* =============================== RESPONSIVE ================================ */
 @media (max-width: 1024px) {
-  .icon-item img {
+  .icon-img {
     width: 64px;
     height: 64px;
   }
@@ -180,13 +148,9 @@
     transform: none;
   }
 
-  .icon-item {
-    justify-content: center;
-  }
-
+  .icon-item,
   .text-item {
     justify-content: center;
     text-align: center;
-    padding: 0;
   }
 }

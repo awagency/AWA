@@ -9,17 +9,20 @@
   perspective: 1200px;
 }
 
-/* ICONO */
+/* ================= ICONO PRINCIPAL ================= */
 
 .hero-feature-card__icon-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  will-change: transform;
+
   transform-style: preserve-3d;
+  will-change: transform;
+  perspective: 1200px;
 }
 
+/* halo suave */
 .hero-feature-card__icon-wrapper::before {
   content: '';
   position: absolute;
@@ -33,13 +36,25 @@
   z-index: -1;
 }
 
+/* icono */
 .hero-feature-card__icon {
-  width: 250px;
-  height: 250px;
+  width: 300px;
+  height: 300px;
   object-fit: contain;
+
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* CONTENIDO */
+/* ================= FLIP ================= */
+
+.hero-feature-card__icon-wrapper.is-flipping .hero-feature-card__icon {
+  transform: rotateY(180deg);
+}
+
+/* ================= CONTENIDO ================= */
 
 .hero-feature-card__content {
   width: 100%;
@@ -61,7 +76,7 @@
   line-height: 1.6;
 }
 
-/* LINEA (ÚNICA) */
+/* ================= DIVIDER ================= */
 
 .hero-feature-card__divider {
   width: 92%;
@@ -75,7 +90,7 @@
   );
 }
 
-/* CTA */
+/* ================= CTA ================= */
 
 .hero-feature-card__cta {
   background: none;
@@ -103,7 +118,7 @@
   opacity: 1;
 }
 
-/* RESPONSIVE */
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {
   .hero-feature-card {
@@ -113,4 +128,11 @@
   .hero-feature-card__description {
     font-size: 16px;
   }
+
+  .hero-feature-card__icon {
+    width: 200px;
+    height: 200px;
+  }
 }
+
+
