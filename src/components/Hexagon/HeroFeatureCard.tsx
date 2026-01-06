@@ -3,19 +3,17 @@ import "./HeroFeatureCard.css";
 
 interface HeroFeatureCardProps {
   title: string;
-  subtitle?: string;
   description: string;
   image: string;
 }
 
 export default function HeroFeatureCard({
   title,
-  subtitle,
   description,
   image
 }: HeroFeatureCardProps) {
   const tiltRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLImageElement>(null); // 🔑 referencia directa al img
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const current = useRef({ rotateX: 0, rotateY: 0 });
   const target = useRef({ rotateX: 0, rotateY: 0 });
@@ -65,7 +63,6 @@ export default function HeroFeatureCard({
     };
   }, []);
 
-  // 🔑 Observa los cambios de image y actualiza el src del img
   useEffect(() => {
     if (imgRef.current) {
       imgRef.current.src = image;
@@ -76,8 +73,8 @@ export default function HeroFeatureCard({
     <div className="hero-feature-card">
       <div className="hero-feature-card__icon-wrapper" ref={tiltRef}>
         <img
-          ref={imgRef} // 🔑 referencia directa
-          src={image} // inicial
+          ref={imgRef}
+          src={image}
           alt=""
           className="hero-feature-card__icon"
         />
@@ -85,8 +82,14 @@ export default function HeroFeatureCard({
 
       <div className="hero-feature-card__content">
         <h2 className="hero-feature-card__title">{title}</h2>
-        {subtitle && <h3 className="hero-feature-card__subtitle">{subtitle}</h3>}
+
         <p className="hero-feature-card__description">{description}</p>
+
+        <div className="hero-feature-card__divider" />
+
+        <button className="hero-feature-card__cta">
+          Ver beneficios
+        </button>
       </div>
     </div>
   );
