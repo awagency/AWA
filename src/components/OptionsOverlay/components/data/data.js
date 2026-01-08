@@ -18,7 +18,7 @@ export const options = [
     {
       label: "EMPRESA",
       img: "/soyUnaEmpresa.png",
-      position2: [1.5, 0.2, 11.5],
+      position2: [1.7, 0.5, 11.8],
       left: "88%",
       right: "24%",
       exit: {

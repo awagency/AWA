@@ -19,7 +19,7 @@ export const OptionsOverlay = ({ onOptionClick }) => {
     // Delay para las imágenes de vidrio (GlassGroup)
     const glassTimer = setTimeout(() => {
       setIsGlassVisible(true);
-    }, 2500); // 3.5 segundos para que las partículas escapen primero
+    }, 1500); // 3.5 segundos para que las partículas escapen primero
 
     // Delay para los botones/opciones
     const optionsTimer = setTimeout(() => {

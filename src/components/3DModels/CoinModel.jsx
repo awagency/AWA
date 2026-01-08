@@ -114,7 +114,7 @@ export const CoinModel = ({ scrollProgress }) => {
 
   const modelPositions = [
     new THREE.Vector3(2.6, 0, -2),
-    new THREE.Vector3(-3.5, 0, 1),
+    new THREE.Vector3(-2.5, 0, 1),
     new THREE.Vector3(-3.5, 0, 1),
     new THREE.Vector3(0, 0, 10),
   ];

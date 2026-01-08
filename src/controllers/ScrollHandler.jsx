@@ -5,7 +5,7 @@ export const ScrollHandler = () => {
   const { setScrollProgress, setIsLeavingOptions } = useContext(AppContext);
   
   useEffect(() => {
-    const sections = [0, 0.15, 0.45, 0.95];
+    const sections = [0, 0.27 , 0.45, 0.95];
     let currentSection = 0;
     let isAnimating = false;
 
