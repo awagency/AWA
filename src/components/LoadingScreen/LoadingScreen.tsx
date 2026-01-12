@@ -1,7 +1,7 @@
 import React from 'react';
 import './LoadingScreen.css';
 
-const LoadingScreen = ({ progress = 0, isVisible = true }) => {
+const LoadingScreen = ({ progress = 0, isVisible = true } : { progress: number, isVisible: boolean }) => {
   if (!isVisible) return null;
 
   return (
