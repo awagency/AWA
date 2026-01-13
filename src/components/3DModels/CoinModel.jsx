@@ -104,10 +104,6 @@ export const CoinModel = ({ scrollProgress }) => {
       setHasLanded(true);
       setCoinHasLanded?.(true);
 
-      // Inicializar partículas tipo río 1 segundo después
-      setTimeout(() => {
-        setParticles(createParticles());
-      }, 1000);
     }, 500);
   }, [scene, setCoinHasLanded]);
 
