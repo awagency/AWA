@@ -220,13 +220,14 @@ export const ServiceSection = () => {
           alt="divider"
           className="hidden lg:block fixed w-[30px] h-screen z-30 object-contain pointer-events-none"
           style={{
-            left: 'calc((100vw - 1280px) / 2 + 35% + 2rem)', // Posicionado entre las columnas (35% + padding)
+            left: 'calc((100vw - 1280px) / 2 + 33% + 2rem)', // Posicionado entre las columnas (35% + padding)
             top: 0,
           }}
         ></img>
+     
 
         {/* === RIGHT COLUMN === */}
-        <div className="w-full lg:w-[55%] flex flex-col items-start relative z-10 pt-8 lg:pt-0 ">
+        <div className="w-full lg:w-[55%] flex flex-col items-start relative z-10 pt-8 lg:pt-0 pl-20 ">
           {/* Header & Filters */}
           <div className="w-full mb-12">
             <h3 className="text-[2.7rem] font-light italic text-white mb-3 tracking-wide drop-shadow-lg">
@@ -328,12 +329,11 @@ export const ServiceSection = () => {
       
       {/* Segunda Sección */}
       <div className="min-h-screen snap-start flex items-center">
-        <div className="container h-full flex items-center justify-center bg-black p-0 md:p-8">
-        <div className="relative w-full max-w-[1200px] h-[600px] flex flex-col md:flex-row shadow-2xl overflow-hidden rounded-lg">
+        <div className="container h-full flex items-center justify-center  p-0 md:p-8">
+        <div className="relative w-full  h-[600px] flex flex-col md:flex-row  overflow-hidden rounded-lg">
           {/* Left Panel: Typography */}
-          <div className="relative z-20 w-full md:w-[45%] bg-[#200096] flex flex-col justify-center px-8 md:px-16 py-12 shadow-[10px_0_30px_rgba(0,0,0,0.4)]">
+          <div className="relative z-20 w-full md:w-[45%]  flex flex-col justify-center px-8 md:px-16 py-12 ">
             {/* Top Gradient Overlay for subtle lighting */}
-            <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#3a1da8] to-transparent opacity-50 pointer-events-none"></div>
 
             <div className="relative z-10 flex flex-col h-full justify-center space-y-8">
               {/* Quote Block */}
@@ -370,20 +370,13 @@ export const ServiceSection = () => {
           </div>
 
           {/* Right Panel: Rocket Illustration */}
-          <div className="relative w-full md:w-[55%] bg-[#12005e] flex items-center justify-center overflow-hidden">
+          <div className="relative w-full md:w-[55%]  flex items-center justify-center overflow-hidden">
             {/* Dot Grid Background Pattern */}
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle, #808080 1px, transparent 1px)",
-                backgroundSize: "24px 24px",
-              }}
-            ></div>
+       
 
             {/* The Rocket Graphic - Animated from left to right behind divider */}
             <motion.div
-              className="relative w-[120%] h-auto scale-90 md:scale-100"
+              className="relative w-[120%] h-auto scale-100 md:scale-100"
               style={{ zIndex: 5 }}
               initial={{ x: "-150%", opacity: 0 }}
               animate={{
@@ -395,7 +388,8 @@ export const ServiceSection = () => {
                 ease: [0.25, 0.1, 0.25, 1],
               }}
             >
-              <RocketIcon />
+              <img src="/rocket.svg" alt="rocket" className="w-full h-full object-contain" />
+              {/* <RocketIcon /> */}
             </motion.div>
 
             {/* Bottom Right Arrow Button */}
