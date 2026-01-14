@@ -59,8 +59,9 @@ export default function Section({ handleBack, position = "right", section }) {
             alt="Volver"
           />
 
-          <header className="section-header">
-            <h1>{data.ui?.title || ""}</h1>
+          <header className="section-header"> 
+            <img style={{position: "absolute", top: 60, left: -30, width: "150px", height: "150px"}} src="/pointer.svg" alt="Logo" className="pointer" />
+            <h1 style={{fontFamily:"Bai Jamjuree"}}>{data.ui?.title || ""}</h1>
             <p>{data.ui?.subtitle || ""}</p>
           </header>
 

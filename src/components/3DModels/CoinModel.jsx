@@ -10,10 +10,10 @@ const COIN_LIGHT_LAYER = 1;
 // =========================
 // VELOCIDADES DE MOVIMIENTO
 // =========================
-const FALL_SPEED = 0.012;     // caída inicial
-const ENTRY_SPEED = 0.02;    // 🔹 primer desplazamiento lateral
-const MOVE_SPEED = 0.02;      // recorrido general
-const FINAL_SPEED = 0.04;     // salida final
+const FALL_SPEED = 0.012; // caída inicial
+const ENTRY_SPEED = 0.02; // 🔹 primer desplazamiento lateral
+const MOVE_SPEED = 0.02; // recorrido general
+const FINAL_SPEED = 0.05; // salida final
 const ENTRY_SCROLL_LIMIT = 0.07;
 // =========================
 
@@ -49,15 +49,14 @@ const createParticles = () => {
         1 + Math.random() * 1.5,
         0
       ),
-      life: 0
+      life: 0,
     });
   }
   return arr;
 };
 
 export const CoinModel = ({ scrollProgress }) => {
-  const { coinRef: ref, activeInfo, setCoinHasLanded } =
-    useContext(AppContext);
+  const { coinRef: ref, activeInfo, setCoinHasLanded } = useContext(AppContext);
 
   const { scene } = useGLTF("/coin2.glb");
   const { camera } = useThree();
@@ -88,7 +87,7 @@ export const CoinModel = ({ scrollProgress }) => {
 
           mats.forEach((m) => {
             if (!m) return;
-            m.metalness = Math.max(m.metalness ?? 0, 0.92);
+            m.metalness = Math.max(m.metalness ?? 1, 0.92);
             m.roughness = Math.min(m.roughness ?? 1, 0.28);
             m.envMapIntensity = Math.max(m.envMapIntensity ?? 1, 2.7);
             m.clearcoat = Math.max(m.clearcoat ?? 0, 0.55);
@@ -105,10 +104,6 @@ export const CoinModel = ({ scrollProgress }) => {
       setHasLanded(true);
       setCoinHasLanded?.(true);
 
-      // Inicializar partículas tipo río 1 segundo después
-      setTimeout(() => {
-        setParticles(createParticles());
-      }, 1000);
     }, 500);
   }, [scene, setCoinHasLanded]);
 
@@ -116,7 +111,7 @@ export const CoinModel = ({ scrollProgress }) => {
     new THREE.Vector3(2.6, 0, -2),
     new THREE.Vector3(-2.5, 0, 1),
     new THREE.Vector3(-3.5, 0, 1),
-    new THREE.Vector3(0, 0, 10),
+    new THREE.Vector3(0, 0, 20),
   ];
 
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
@@ -139,12 +134,20 @@ export const CoinModel = ({ scrollProgress }) => {
     }
 
     if (!isManuallyMoved) {
-      // ESCALA
+      //Transicion de la seccion de opciones a la screen final
       if (scrollProgress >= 0.9) {
-        const scaleFactor = 1 + (scrollProgress - 0.9) * 2500;
+        const scaleFactor = 1 + (scrollProgress - 0.9) * 2200;
         ref.current.scale.lerp(
           new THREE.Vector3(scaleFactor, scaleFactor, scaleFactor),
-          0.05
+          0.03
+        );
+        const liftAmount = (scrollProgress - 0.82) *2 // Sube hasta 0.2 unidades
+        const baseY = 2; // Posición base Y
+        const targetY = baseY + liftAmount;
+        ref.current.position.y = THREE.MathUtils.lerp(
+          ref.current.position.y,
+          targetY,
+          0.03
         );
       } else {
         const s = getResponsiveScale();
@@ -153,11 +156,15 @@ export const CoinModel = ({ scrollProgress }) => {
 
       // POSICIÓN
       if (!hasLanded) ref.current.position.lerp(centerPosition, FALL_SPEED);
-      else if (scrollProgress < ENTRY_SCROLL_LIMIT) ref.current.position.lerp(entryPosition, ENTRY_SPEED);
+      else if (scrollProgress < ENTRY_SCROLL_LIMIT)
+        ref.current.position.lerp(entryPosition, ENTRY_SPEED);
       else {
         const isFinalSection = scrollProgress >= 0.4;
         if (!isFinalSection) {
-          const index = Math.min(Math.floor(scrollProgress * (modelPositions.length - 1)), modelPositions.length - 2);
+          const index = Math.min(
+            Math.floor(scrollProgress * (modelPositions.length - 1)),
+            modelPositions.length - 2
+          );
           const start = modelPositions[index];
           const end = modelPositions[index + 1];
           const rawProgress = scrollProgress * (modelPositions.length - 1);
@@ -166,13 +173,46 @@ export const CoinModel = ({ scrollProgress }) => {
           targetPosition.current.lerpVectors(start, end, easedProgress);
           ref.current.position.lerp(targetPosition.current, MOVE_SPEED);
         } else {
-          ref.current.position.lerp(new THREE.Vector3(0, 0, 10), FINAL_SPEED);
+          console.log("scrollProgress", scrollProgress);
+          //aca se edita cuando la moneda esta al centro de las opciones
+          // Mantener Y actual cuando scrollProgress >= 0.9 (se ajusta en la sección de rotación)
+          if (scrollProgress >= 0.9) {
+            const currentY = ref.current.position.y;
+            ref.current.position.lerp(new THREE.Vector3(0, currentY, 10), FINAL_SPEED);
+          } else {
+            ref.current.position.lerp(new THREE.Vector3(0, 0, 10), FINAL_SPEED);
+          }
         }
       }
 
       // ROTACIÓN
-      ref.current.rotation.y += delta * 0.5;
-      ref.current.rotation.x += delta * 0.2;
+      if (scrollProgress >= 0.82) {
+        // Cuando scrollProgress >= 0.82, orientar la moneda hacia la cámara
+        tempMatrix.lookAt(
+          ref.current.position,
+          camera.position,
+          ref.current.up
+        );
+        tempQuat.setFromRotationMatrix(tempMatrix);
+        tempQuat.multiply(offsetQuat);
+        ref.current.quaternion.slerp(tempQuat, 0.08);
+        
+        // Subir la moneda levemente mientras se orienta hacia la cámara
+        if (scrollProgress >= 0.82) {
+          const liftAmount = (scrollProgress - 0.82) * 0.5; // Sube hasta 0.2 unidades
+          const baseY = 0; // Posición base Y
+          const targetY = baseY + liftAmount;
+          ref.current.position.y = THREE.MathUtils.lerp(
+            ref.current.position.y,
+            targetY,
+            0.05
+          );
+        }
+      } else {
+        // Rotación normal antes de llegar a 0.9
+        ref.current.rotation.y += delta * 0.5;
+        ref.current.rotation.x += delta * 0.2;
+      }
     }
 
     // =========================
