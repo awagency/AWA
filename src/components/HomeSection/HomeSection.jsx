@@ -2,8 +2,11 @@ import { motion, AnimatePresence } from "motion/react";
 import { useContext, useState, useEffect } from "react";
 import { AppContext } from "../../context/AppContext";
 import "./HomeSection.css";
+import ContactScreen from "../Contacto/ContactScreen"
 
 const HomeSection = () => {
+  const [showContact, setShowContact] = useState(false)
+
   const { setContactModal, scrollProgress, coinHasLanded } = useContext(AppContext);
   const [showContent, setShowContent] = useState(false);
 
@@ -64,9 +67,14 @@ const HomeSection = () => {
               Potenciamos empresas, profesionales y proyectos<br />
               digitales a través de nuestros servicios.
             </p>
-            <button className="home-contact-button" onClick={handleContactClick}>
-              Contacto
-            </button>
+                {/* TU CONTENIDO */}
+      <button onClick={() => setShowContact(true)}>
+        Contacto
+      </button>
+
+      {showContact && (
+        <ContactScreen onClose={() => setShowContact(false)} />
+      )}
           </motion.div>
         )}
       </AnimatePresence>
