@@ -222,3 +222,4 @@ export const Hexagon: React.FC<HexagonProps> = ({
     </motion.div>
   );
 };
+
