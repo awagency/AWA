@@ -14,7 +14,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Hexagon } from "../Hexagon";
 import { ServiceItem } from "../../../types";
 import { ArrowUp } from "lucide-react";
-import RocketIcon from "../RocketIcon";
 
 // Data Definition - Puedes personalizar estos servicios
 const SERVICES: ServiceItem[] = [
