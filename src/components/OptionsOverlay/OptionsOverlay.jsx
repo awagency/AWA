@@ -54,7 +54,7 @@ export const OptionsOverlay = ({ onOptionClick }) => {
     setTimeout(() => {
       setIsGlassVisible(true); // Mostrar imágenes después de 3.5 segundos
       setIsVisible(true); // Volver a mostrar opciones después de 4 segundos
-    }, 4000);
+    }, 500);
   };
 
   return (
