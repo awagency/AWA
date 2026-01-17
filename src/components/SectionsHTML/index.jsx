@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext } from "../../context/AppContext";
 import { useScrollManager } from "../../controllers/useScrollManager";
-import { SCROLL_RANGES } from "../../controllers/scrollConfig";
-import FirstText from "../Onboarding/FirstText";
+
 import { OptionsOverlay } from "../OptionsOverlay/OptionsOverlay";
-import { BladesAndReveal } from "../BladesAndReveal/BladesAndReveal";
 import ServiceCards from "../ServicesCards/ServiceCards";
 import ContactForm from "../ContactForm";
 import HomeSection from "../HomeSection/HomeSection";
@@ -13,9 +11,7 @@ import SecondSection from "../SecondSection/SecondSection";
 const SectionsHTML = () => {
   const {
     scrollProgress,
-    activeInfo,
-    setActiveInfo,
-    setCameraTarget,
+ 
     setScrollProgress,
     contactModal,
     handleOptionClick,
@@ -38,12 +34,7 @@ const SectionsHTML = () => {
       {showHomeSection && <HomeSection />}
       {showSecondSection && <SecondSection />}
       
-      {isInSection("TITLES")(scrollProgress) && (
-        <FirstText
-          sectionRange={SCROLL_RANGES.SECTIONS.TITLES}
-          scrollProgress={scrollProgress}
-        ></FirstText>
-      )}
+ 
       {isInSection("OPTIONS")(scrollProgress) && (
         <OptionsOverlay
           onOptionClick={(position, label) =>
@@ -52,12 +43,7 @@ const SectionsHTML = () => {
         />
       )}
 
-      {isInSection("BLADES")(scrollProgress) && (
-        <BladesAndReveal
-          scrollProgress={scrollProgress}
-          sectionRange={SCROLL_RANGES.SECTIONS.BLADES}
-        />
-      )}
+ 
 
       {isInSection("CARDS")(scrollProgress) && <ServiceCards />}
       <ContactForm></ContactForm>

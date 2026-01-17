@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import FeaturesList from "../../../../hexagon/FeaturesList";
-import HeroFeatureCard from "../../../../hexagon/HeroFeatureCard";
+import FeaturesList from "../../../../Hexagon/FeaturesList";
+import HeroFeatureCard from "../../../../Hexagon/HeroFeatureCard";
 import { SectionData } from "../data/data";
 import "./Section.css";
 
