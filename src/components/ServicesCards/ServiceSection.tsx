@@ -370,7 +370,6 @@ export const ServiceSection = () => {
 
           {/* Right Panel: Rocket Illustration */}
           <div className="relative w-full md:w-[55%]  flex items-center justify-center overflow-hidden">
-            {/* Dot Grid Background Pattern */}
        
 
             {/* The Rocket Graphic - Animated from left to right behind divider */}
