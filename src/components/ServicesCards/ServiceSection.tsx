@@ -169,9 +169,9 @@ export const ServiceSection = () => {
 
       {/* Primera Sección */}
       <div className="min-h-screen snap-start flex items-center">
-        <div className="container mx-auto px-6 md:px-12 h-full flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-0">
+        <div className="container mx-auto px-6 md:px-12 h-full flex flex-col lg:flex-row items-center justify-center gap-10 ">
         {/* === LEFT COLUMN === */}
-        <div className="w-full lg:w-[35%] flex flex-col z-10 lg:pr-8 gap-8">
+        <div className="w-full lg:w-[35%] flex flex-col z-10  gap-8">
           {/* Brand Title */}
           <div className="w-full flex">
             <img
@@ -219,7 +219,7 @@ export const ServiceSection = () => {
           alt="divider"
           className="hidden lg:block fixed w-[30px] h-screen z-30 object-contain pointer-events-none"
           style={{
-            left: 'calc((100vw - 1280px) / 2 + 33% + 2rem)', // Posicionado entre las columnas (35% + padding)
+            left: '44vw', // Posicionado entre las columnas (35% + padding)
             top: 0,
           }}
         ></img>
@@ -315,10 +315,10 @@ export const ServiceSection = () => {
             {/* Bottom Section: Small Hexagons + Link */}
             <div className="flex flex-row items-center w-full gap-10">
               <div className="flex-grow flex justify-end pr-2">
-                <button className="flex items-center gap-2 text-lg font-light italic text-gray-100 hover:text-white transition-colors group">
+                <a className="flex items-center gap-2 text-lg font-light italic text-gray-100 hover:text-white transition-colors group">
                   Ver beneficios
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -379,7 +379,7 @@ export const ServiceSection = () => {
               style={{ zIndex: 5 }}
               initial={{ x: "-150%", opacity: 0 }}
               animate={{
-                x: currentSection === 1 ? "0%" : "-150%",
+                x: currentSection === 1 ? "-12%" : "-150%",
                 opacity: currentSection === 1 ? 1 : 0,
               }}
               transition={{
