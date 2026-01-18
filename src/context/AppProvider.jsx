@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { AppContext } from "./AppContext";
 import reactotron from "../ReactotronConfig";
-import { useGLTF } from "@react-three/drei";
 import LoadingScreen from "../components/LoadingScreen/LoadingScreen";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 

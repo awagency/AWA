@@ -7,8 +7,10 @@ import { Scene } from './components/3DScene/Scene';
 import ScrollHandler from './controllers/ScrollHandler';
 import SectionsHTML from './components/SectionsHTML';
 import * as THREE from "three";
+import { useIsMobile } from './hooks/useIsMobile';
 
 export default function MainApp() {
+  const isMobile = useIsMobile();
   
     // Función para cambiar el z-index de todos los canvas
     const updateCanvasZIndex = () => {
@@ -52,6 +54,7 @@ export default function MainApp() {
               gl={{
                     // autoClear:true,
                     powerPreference: "high-performance",
+                  
 
                 }}
               onCreated={({ gl }) => {
@@ -60,7 +63,6 @@ export default function MainApp() {
                 gl.toneMappingExposure = 1.35;
                 gl.outputColorSpace = THREE.SRGBColorSpace;
               }}
-                // dpr={Math.min(window.devicePixelRatio, 2)} // Limita el DPR para mejor rendimiento
                 style={{
                     width: "100vw",
                     height: "100vh",
