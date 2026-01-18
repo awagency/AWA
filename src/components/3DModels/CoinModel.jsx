@@ -77,8 +77,8 @@ export const CoinModel = ({ scrollProgress }) => {
   
   // Posiciones para móvil (siempre centradas horizontalmente)
   const mobileStartPosition = new THREE.Vector3(0, 15, -5);
-  const mobileCenterPosition = new THREE.Vector3(0, 0, -3);
-  const mobileEntryPosition = new THREE.Vector3(0, -1, -2);
+  const mobileCenterPosition = new THREE.Vector3(0, 0, -2);
+  const mobileEntryPosition = new THREE.Vector3(0, 1, -1);
   
   const targetPosition = useRef(new THREE.Vector3());
   const [isMobileDevice, setIsMobileDevice] = useState(false);

@@ -87,8 +87,8 @@
     width: 100%;
     left: 0;
     top: 0;
-    align-items: flex-start;
-    padding-top: 10vh;
+    align-items: flex-end;
+    padding-bottom: 16vh;
     justify-content: center;
   }
 
