@@ -58,7 +58,7 @@ const createParticles = () => {
 export const CoinModel = ({ scrollProgress }) => {
   const { coinRef: ref, activeInfo, setCoinHasLanded } = useContext(AppContext);
 
-  const { scene } = useGLTF("/coin2.glb");
+  const { scene } = useGLTF("/coinhd.glb");
   const { camera } = useThree();
 
   const [isManuallyMoved, setIsManuallyMoved] = useState(false);
@@ -74,29 +74,7 @@ export const CoinModel = ({ scrollProgress }) => {
   // Inicialización de moneda y escena
   // =========================
   useEffect(() => {
-    if (scene) {
-      scene.traverse((obj) => {
-        if (obj?.isMesh) {
-          obj.layers.enable(COIN_LIGHT_LAYER);
-          obj.castShadow = true;
-          obj.receiveShadow = true;
 
-          const mats = Array.isArray(obj.material)
-            ? obj.material
-            : [obj.material];
-
-          mats.forEach((m) => {
-            if (!m) return;
-            m.metalness = Math.max(m.metalness ?? 1, 0.92);
-            m.roughness = Math.min(m.roughness ?? 1, 0.28);
-            m.envMapIntensity = Math.max(m.envMapIntensity ?? 1, 2.7);
-            m.clearcoat = Math.max(m.clearcoat ?? 0, 0.55);
-            m.clearcoatRoughness = Math.min(m.clearcoatRoughness ?? 1, 0.15);
-            m.needsUpdate = true;
-          });
-        }
-      });
-    }
 
     if (ref.current) ref.current.position.copy(startPosition);
 
