@@ -29,6 +29,11 @@ const getResponsiveScale = () => {
   return baseScale * scaleFactor;
 };
 
+// Detectar si estamos en móvil
+const isMobile = () => {
+  return window.innerWidth <= 768;
+};
+
 // =========================
 // PARTICULAS TIPO RÍO
 // =========================
@@ -65,10 +70,31 @@ export const CoinModel = ({ scrollProgress }) => {
   const [hasLanded, setHasLanded] = useState(false);
   const [particles, setParticles] = useState([]);
 
+  // Posiciones para desktop
   const startPosition = new THREE.Vector3(2.5, 15, -3);
   const centerPosition = new THREE.Vector3(0, 0, -3);
   const entryPosition = new THREE.Vector3(2.6, 0, -2);
+  
+  // Posiciones para móvil (siempre centradas horizontalmente)
+  const mobileStartPosition = new THREE.Vector3(0, 15, -5);
+  const mobileCenterPosition = new THREE.Vector3(0, 0, -3);
+  const mobileEntryPosition = new THREE.Vector3(0, -1, -2);
+  
   const targetPosition = useRef(new THREE.Vector3());
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  // =========================
+  // Detectar cambios de tamaño de pantalla
+  // =========================
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileDevice(isMobile());
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // =========================
   // Inicialización de moneda y escena
@@ -76,7 +102,9 @@ export const CoinModel = ({ scrollProgress }) => {
   useEffect(() => {
 
 
-    if (ref.current) ref.current.position.copy(startPosition);
+    // Usar posición inicial según el dispositivo
+    const initialPosition = isMobile() ? mobileStartPosition : startPosition;
+    if (ref.current) ref.current.position.copy(initialPosition);
 
     setTimeout(() => {
       setHasLanded(true);
@@ -85,12 +113,23 @@ export const CoinModel = ({ scrollProgress }) => {
     }, 500);
   }, [scene, setCoinHasLanded]);
 
-  const modelPositions = [
+  // Posiciones del recorrido según dispositivo
+  const desktopPositions = [
     new THREE.Vector3(2.6, 0, -2),
     new THREE.Vector3(-2.5, 0, 1),
     new THREE.Vector3(-3.5, 0, 1),
     new THREE.Vector3(0, 0, 20),
   ];
+
+  // En móvil: recorrido vertical centrado (solo cambia Y y Z)
+  const mobilePositions = [
+    new THREE.Vector3(10, 0, -2),      // Después del aterrizaje, centrada
+    new THREE.Vector3(0, -1.3, 1),     // Baja un poco
+    new THREE.Vector3(0, -4, 5),     // Baja más
+    new THREE.Vector3(0, 0, 20),     // Final
+  ];
+  
+  const modelPositions = isMobileDevice ? mobilePositions : desktopPositions;
 
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
@@ -133,10 +172,18 @@ export const CoinModel = ({ scrollProgress }) => {
       }
 
       // POSICIÓN
-      if (!hasLanded) ref.current.position.lerp(centerPosition, FALL_SPEED);
-      else if (scrollProgress < ENTRY_SCROLL_LIMIT)
-        ref.current.position.lerp(entryPosition, ENTRY_SPEED);
-      else {
+      const currentCenterPosition = isMobileDevice ? mobileCenterPosition : centerPosition;
+      const currentEntryPosition = isMobileDevice ? mobileEntryPosition : entryPosition;
+      
+      if (!hasLanded) {
+        ref.current.position.lerp(currentCenterPosition, FALL_SPEED);
+        // Forzar centrado en móvil
+        if (isMobileDevice) ref.current.position.x = 0;
+      } else if (scrollProgress < ENTRY_SCROLL_LIMIT) {
+        ref.current.position.lerp(currentEntryPosition, ENTRY_SPEED);
+        // Forzar centrado en móvil
+        if (isMobileDevice) ref.current.position.x = 0;
+      } else {
         const isFinalSection = scrollProgress >= 0.4;
         if (!isFinalSection) {
           const index = Math.min(
@@ -150,15 +197,22 @@ export const CoinModel = ({ scrollProgress }) => {
           const easedProgress = easeOutCubic(localProgress);
           targetPosition.current.lerpVectors(start, end, easedProgress);
           ref.current.position.lerp(targetPosition.current, MOVE_SPEED);
+          // Forzar centrado en móvil durante el recorrido
+          if (isMobileDevice) ref.current.position.x = 0;
         } else {
-          console.log("scrollProgress", scrollProgress);
           //aca se edita cuando la moneda esta al centro de las opciones
           // Mantener Y actual cuando scrollProgress >= 0.9 (se ajusta en la sección de rotación)
           if (scrollProgress >= 0.9) {
             const currentY = ref.current.position.y;
-            ref.current.position.lerp(new THREE.Vector3(0, currentY, 10), FINAL_SPEED);
+            // En móvil siempre centrada horizontalmente
+            const finalX = 0;
+            ref.current.position.lerp(new THREE.Vector3(finalX, currentY, 10), FINAL_SPEED);
+            if (isMobileDevice) ref.current.position.x = 0;
           } else {
-            ref.current.position.lerp(new THREE.Vector3(0, 0, 10), FINAL_SPEED);
+            // En móvil siempre centrada horizontalmente
+            const finalX = 0;
+            ref.current.position.lerp(new THREE.Vector3(finalX, 0, 10), FINAL_SPEED);
+            if (isMobileDevice) ref.current.position.x = 0;
           }
         }
       }
@@ -185,6 +239,8 @@ export const CoinModel = ({ scrollProgress }) => {
             targetY,
             0.05
           );
+          // Forzar centrado en móvil durante la rotación
+          if (isMobileDevice) ref.current.position.x = 0;
         }
       } else {
         // Rotación normal antes de llegar a 0.9
