@@ -1,13 +1,9 @@
 import { useRef, useContext, useState, useEffect } from "react";
 import { CoinModel } from "../3DModels/CoinModel";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Stars, SoftShadows, Html, Environment } from "@react-three/drei";
+import { SoftShadows, Environment } from "@react-three/drei";
 import { AppContext } from "../../context/AppContext";
 import { IconParticles } from './IconParticles';
-import Model from "../../context/Models";
-import * as THREE from "three";
-import OptimizedModel from "../3DModels/OptimizedModel";
-import { useIsMobile } from "../../hooks/useIsMobile";
 
 // Layer dedicado para las luces de la moneda
 const COIN_LIGHT_LAYER = 1;
@@ -233,7 +229,6 @@ export const Scene = () => {
   const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref, coinHasLanded } = useContext(AppContext);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { viewport, camera } = useThree();
-  const isMobile = useIsMobile();
 
   // Habilitar el layer de luces de la moneda en la cámara
   useEffect(() => {
@@ -259,61 +254,46 @@ export const Scene = () => {
 
   return (
     <>
-      {/* SoftShadows solo en desktop - muy costoso en móviles */}
-      {!isMobile && <SoftShadows size={25} samples={16} focus={0.5} />}
-      <ambientLight intensity={isMobile ? 0.8 : 0.5} />
-      
-      {/* Environment solo en desktop - carga HDRIs grandes */}
-      {!isMobile && <Environment preset="city" background={false} blur={0.25} />}
-      
-      {/* Sistema de iluminación dedicado para la moneda - solo en desktop */}
-      {!isMobile && <CoinLightRig />}
-      
-      {/* Resplandor ambiental - solo en desktop */}
-      {!isMobile && <CoinAmbientGlow />}
-      
-      {/* Partículas de fondo - solo en desktop */}
-      {coinHasLanded && !isMobile && <IconParticles count={6} zMin={-60} zMax={-40} opacityMultiplier={0.4} />}
-      
-      {/* Partículas de íconos - reducir cantidad en móviles */}
-      {coinHasLanded && <IconParticles count={isMobile ? 3 : 9} />}
+      <SoftShadows size={25} samples={16} focus={0.5} />
+      <ambientLight intensity={0.5} />
+      <Environment preset="city" background={false} blur={0.25} />
+      <CoinLightRig />
+      <CoinAmbientGlow />
+      {coinHasLanded && <IconParticles count={6} zMin={-60} zMax={-40} opacityMultiplier={0.4} />}
+      {coinHasLanded && <IconParticles count={9} />}
       
       <directionalLight
         position={[5, 5, 5]}
         intensity={1}
-        castShadow={!isMobile}
-        shadow-mapSize-width={isMobile ? 256 : 1024}
-        shadow-mapSize-height={isMobile ? 256 : 1024}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-far={50}
         shadow-camera-left={-10}
         shadow-camera-right={10}
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
       />
-      <pointLight position={[-5, 2, -5]} intensity={isMobile ? 0.3 : 0.5} />
-      {!isMobile && (
-        <spotLight
-          position={[0, 10, 0]}
-          angle={0.3}
-          penumbra={1}
-          intensity={0.8}
-          castShadow
-        />
-      )}
+      <pointLight position={[-5, 2, -5]} intensity={0.5} />
+      <spotLight
+        position={[0, 10, 0]}
+        angle={0.3}
+        penumbra={1}
+        intensity={0.8}
+        castShadow
+      />
       <directionalLight scale={2}
         position={[-2, 0, 5]}
         intensity={scrollProgress > 0.4 && scrollProgress < 0.8 ? 0.5 : 0.5}
-        castShadow={!isMobile}
-        shadow-mapSize-width={isMobile ? 256 : 1024}
-        shadow-mapSize-height={isMobile ? 256 : 1024}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
         shadow-camera-far={50}
         shadow-camera-left={-10}
         shadow-camera-right={10}
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
       />
-
-      {/* Reducir estrellas drásticamente en móviles */}
   
       <CoinModel scrollProgress={scrollProgress} />
 
