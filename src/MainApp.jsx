@@ -1,17 +1,13 @@
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import Navbar from './components/Navbar/Navbar';
 import { Canvas } from '@react-three/fiber';
-import { CameraController } from './controllers/CameraController';
 import { Section } from './components/3DScene/Section';
 import { Scene } from './components/3DScene/Scene';
 import ScrollHandler from './controllers/ScrollHandler';
 import SectionsHTML from './components/SectionsHTML';
 import * as THREE from "three";
-import { useIsMobile } from './hooks/useIsMobile';
 
 export default function MainApp() {
-  const isMobile = useIsMobile();
-  
     // Función para cambiar el z-index de todos los canvas
     const updateCanvasZIndex = () => {
       // Seleccionar todos los elementos canvas
@@ -74,7 +70,6 @@ export default function MainApp() {
 
                 camera={{ position: [0,0,0], fov: 50, near: 1, far: 1000 }}
             >
-                <CameraController />
                 <Section>
                     <Scene/>
                 </Section>

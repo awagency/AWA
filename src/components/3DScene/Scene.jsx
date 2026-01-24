@@ -1,7 +1,8 @@
 import { useRef, useContext, useState, useEffect } from "react";
 import { CoinModel } from "../3DModels/CoinModel";
+import { CombinedGlasses } from "../3DModels/CombinedGlasses";
 import { useFrame, useThree } from "@react-three/fiber";
-import { SoftShadows, Environment } from "@react-three/drei";
+import { SoftShadows, Environment, Lightformer } from "@react-three/drei";
 import { AppContext } from "../../context/AppContext";
 import { IconParticles } from './IconParticles';
 
@@ -188,75 +189,67 @@ const CoinLightRig = () => {
   );
 };
 
-// Añade este componente justo después de la definición de Scene
-const RotatingGroup = ({ children }) => {
-  const groupRef = useRef();
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.5;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {children}
-    </group>
-  );
-};
 
 
-const FloatingModel = ({ position = [0, 0, 0], offset = 0, children ,character}) => {
-  const ref = useRef()
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime()
-    if(character === 1){
-      ref.current.position.y = Math.sin(t * 1.1 + offset) * 0.08 // flotación con desfase
-
-    }
-    else {
-      ref.current.position.y = Math.sin(t * 1.1 + offset) * 0.1 // flotación con desfase
-
-    }
-  })
-
-  return <group ref={ref} position={position}>{children}</group>
-}
 
 
 export const Scene = () => {
-  const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref, coinHasLanded } = useContext(AppContext);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const { viewport, camera } = useThree();
+  const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref, coinHasLanded, isLeavingOptions } = useContext(AppContext);
+  const {  camera } = useThree();
+
+  const combinedGlasses = {
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+    scale: 1,
+  };
+
+  // Calcular visibilidad y opacidad de los glases basado en scrollProgress
+  const isInOptionsScreen = scrollProgress >= 0.35 && scrollProgress < 0.55;
+  const showGlasses = isInOptionsScreen && !activeInfo && !isLeavingOptions;
+  
+  // Animación suave de entrada/salida basada en scrollProgress
+  const getGlassOpacity = (startProgress, endProgress) => {
+    if (scrollProgress < startProgress || scrollProgress > endProgress) return 0;
+    const progress = (scrollProgress - startProgress) / (endProgress - startProgress);
+    // Easing suave
+    const eased = progress < 0.5 
+      ? 2 * progress * progress 
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    return Math.max(0, Math.min(1, eased));
+  };
+
+  const combinedOpacity = getGlassOpacity(0.35, 0.52);
+  const glassesZOffset = -3;
 
   // Habilitar el layer de luces de la moneda en la cámara
   useEffect(() => {
     camera.layers.enable(COIN_LIGHT_LAYER);
   }, [camera]);
 
-  // NUEVO: referencia para el grupo del maletín
-  const maletinGroupRef = useRef();
 
-  const handleMouseMove = (event) => {
-    const x = (event.clientX / window.innerWidth) * 2 - 1;
-    const y = -(event.clientY / window.innerHeight) * 2 + 1;
-    setMousePosition({ x, y });
-  };
+  // Nota: antes se escuchaba `mousemove` y se guardaba en estado, pero no se usaba.
+  // Eso causaba renders en cada movimiento del mouse.
 
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  const showModels = scrollProgress <= 0.01 || activeInfo;
-  const positionModel = scrollProgress <= 0.1 || !activeInfo;
 
   return (
     <>
       <SoftShadows size={25} samples={16} focus={0.5} />
       <ambientLight intensity={0.5} />
-      <Environment preset="city" background={false} blur={0.25} />
+      {/* Iluminación ambiental local para mantener materiales (sin HDR remoto) */}
+      <Environment resolution={256} background={false}>
+        <Lightformer
+          intensity={2.0}
+          position={[5, 5, 5]}
+          rotation={[0, Math.PI / 4, 0]}
+          scale={[10, 10, 1]}
+        />
+        <Lightformer
+          intensity={1.2}
+          position={[-5, -2, 5]}
+          rotation={[0, -Math.PI / 4, 0]}
+          scale={[8, 8, 1]}
+        />
+      </Environment>
       <CoinLightRig />
       <CoinAmbientGlow />
       {coinHasLanded && <IconParticles count={6} zMin={-60} zMax={-40} opacityMultiplier={0.4} />}
@@ -297,13 +290,20 @@ export const Scene = () => {
   
       <CoinModel scrollProgress={scrollProgress} />
 
-  
-
-  
-
-     
-
-
+      {/* Modelo combinado de gafas integrado en el canvas principal */}
+      {showGlasses && (
+        <CombinedGlasses
+          position={[
+            combinedGlasses.position[0],
+            combinedGlasses.position[1],
+            combinedGlasses.position[2] + glassesZOffset,
+          ]}
+          rotation={combinedGlasses.rotation}
+          scale={combinedGlasses.scale}
+          visible={combinedOpacity > 0}
+          opacity={combinedOpacity}
+        />
+      )}
 
     </>
   );

@@ -1,19 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  ExternalLink,
-  UserCog,
-  LayoutGrid,
-  GitMerge,
-  Headphones,
-  ArrowRight,
-  User,
-  Building2,
-  Diamond,
-} from "lucide-react";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import UserCog from "lucide-react/dist/esm/icons/user-cog";
+import LayoutGrid from "lucide-react/dist/esm/icons/layout-grid";
+import GitMerge from "lucide-react/dist/esm/icons/git-merge";
+import Headphones from "lucide-react/dist/esm/icons/headphones";
+import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
+import User from "lucide-react/dist/esm/icons/user";
+import Building2 from "lucide-react/dist/esm/icons/building-2";
+import Diamond from "lucide-react/dist/esm/icons/diamond";
+import ArrowUp from "lucide-react/dist/esm/icons/arrow-up";
 import { motion, AnimatePresence } from "framer-motion";
 import { Hexagon } from "../Hexagon";
 import { ServiceItem } from "../../../types";
-import { ArrowUp } from "lucide-react";
 
 // Data Definition - Puedes personalizar estos servicios
 const SERVICES: ServiceItem[] = [
