@@ -18,7 +18,7 @@ const OPTIONS_CENTER_POS_MOBILE = new THREE.Vector3(0, 0, 10);
 
 const DESKTOP_PATH_POSITIONS = [
   new THREE.Vector3(2.6, 0, -2),
-  new THREE.Vector3(-2.5, 0, 1),
+  new THREE.Vector3(-2.5, 0, -1),
   new THREE.Vector3(-3.5, 0, 1),
   new THREE.Vector3(0, 0, 20),
 ];
@@ -31,15 +31,11 @@ const MOBILE_PATH_POSITIONS = [
 ];
 
 // =========================
-// VELOCIDADES DE MOVIMIENTO
+// CONFIGURACIÓN DE SECCIONES
 // =========================
-const FALL_SPEED = 0.012; // caída inicial
-const ENTRY_SPEED = 0.02; // 🔹 primer desplazamiento lateral
-const MOVE_SPEED = 0.02; // recorrido general
-const FINAL_SPEED = 0.05; // salida final
 const ENTRY_SCROLL_LIMIT = 0.07;
 // Rango de la sección OPTIONS (ver `Scene.jsx`)
-const OPTIONS_START = 0.35;
+const OPTIONS_START = 0.38;
 const OPTIONS_END = 0.55;
 // Inicio del tramo final (pantalla final / zoom)
 const FINAL_SECTION_START = 0.82;
@@ -75,6 +71,7 @@ export const CoinModel = ({ scrollProgress }) => {
   const [hasLanded, setHasLanded] = useState(false);
   
   const targetPosition = useRef(new THREE.Vector3());
+  const blendedTarget = useRef(new THREE.Vector3());
   const tempScaleVec = useRef(new THREE.Vector3());
   const tempFinalVec = useRef(new THREE.Vector3());
   const [isMobileDevice, setIsMobileDevice] = useState(false);
@@ -120,14 +117,30 @@ export const CoinModel = ({ scrollProgress }) => {
   useFrame((state, delta) => {
     if (!ref.current) return;
 
+    // Damping framerate-independent (velocidad constante y suave)
+    const MOVE_DAMPING = 3.5; // Velocidad de movimiento uniforme
+    const damp = (lambda) => 1 - Math.exp(-lambda * delta);
+
+    // Transición suave hacia/desde OPTIONS
+    const OPTIONS_BLEND_WINDOW = 0.04;
+    const enterW = THREE.MathUtils.smoothstep(
+      scrollProgress,
+      OPTIONS_START - OPTIONS_BLEND_WINDOW,
+      OPTIONS_START + OPTIONS_BLEND_WINDOW
+    );
+    const exitW = THREE.MathUtils.smoothstep(
+      scrollProgress,
+      OPTIONS_END - OPTIONS_BLEND_WINDOW,
+      OPTIONS_END + OPTIONS_BLEND_WINDOW
+    );
+    const optionsWeight = THREE.MathUtils.clamp(enterW * (1 - exitW), 0, 1);
+
     const isInOptionsSection =
       scrollProgress >= OPTIONS_START && scrollProgress < OPTIONS_END;
 
     // =========================
     // INFO ACTIVA
     // =========================
-    // Fuera de OPTIONS, mantener el comportamiento actual (mirar a cámara).
-    // Dentro de OPTIONS, NO congelamos la moneda: debe mantener su rotación previa.
     if (activeInfo && !isInOptionsSection) {
       tempMatrix.lookAt(ref.current.position, camera.position, ref.current.up);
       tempQuat.setFromRotationMatrix(tempMatrix);
@@ -136,110 +149,109 @@ export const CoinModel = ({ scrollProgress }) => {
       return;
     }
 
-      //Transicion de la seccion de opciones a la screen final
-      if (scrollProgress >= 0.9) {
-        const scaleFactor = 1 + (scrollProgress - 0.9) * 2200;
-        tempScaleVec.current.set(scaleFactor, scaleFactor, scaleFactor);
-        ref.current.scale.lerp(tempScaleVec.current, 0.03);
-        const liftAmount = (scrollProgress - 0.82) *2 // Sube hasta 0.2 unidades
-        const baseY = 2; // Posición base Y
-        const targetY = baseY + liftAmount;
-        ref.current.position.y = THREE.MathUtils.lerp(
-          ref.current.position.y,
-          targetY,
-          0.03
-        );
-      } else {
-        const s = getResponsiveScale();
-        tempScaleVec.current.set(s, s, s);
-        ref.current.scale.lerp(tempScaleVec.current, 0.1);
-      }
+    // =========================
+    // ESCALA (suave y continua)
+    // =========================
+    if (scrollProgress >= 0.9) {
+      const scaleFactor = 1 + (scrollProgress - 0.9) * 2200;
+      tempScaleVec.current.set(scaleFactor, scaleFactor, scaleFactor);
+      ref.current.scale.lerp(tempScaleVec.current, damp(4.0));
+    } else {
+      const s = getResponsiveScale();
+      tempScaleVec.current.set(s, s, s);
+      ref.current.scale.lerp(tempScaleVec.current, damp(5.0));
+    }
 
-      // POSICIÓN
-      const currentCenterPosition = isMobileDevice ? CENTER_POS_MOBILE : CENTER_POS_DESKTOP;
-      const currentEntryPosition = isMobileDevice ? ENTRY_POS_MOBILE : ENTRY_POS_DESKTOP;
+    // =========================
+    // POSICIÓN (sistema unificado y continuo)
+    // =========================
+    const currentCenterPosition = isMobileDevice ? CENTER_POS_MOBILE : CENTER_POS_DESKTOP;
+    const currentEntryPosition = isMobileDevice ? ENTRY_POS_MOBILE : ENTRY_POS_DESKTOP;
+    const optsPos = isMobileDevice ? OPTIONS_CENTER_POS_MOBILE : OPTIONS_CENTER_POS_DESKTOP;
+    
+    // Calcular target de posición según el scrollProgress
+    if (!hasLanded) {
+      // Caída inicial
+      ref.current.position.lerp(currentCenterPosition, damp(2.0));
+      if (isMobileDevice) ref.current.position.x = 0;
+    } else if (scrollProgress < ENTRY_SCROLL_LIMIT) {
+      // Entrada inicial
+      ref.current.position.lerp(currentEntryPosition, damp(2.5));
+      if (isMobileDevice) ref.current.position.x = 0;
+    } else {
+      // Recorrido principal: calcular posición base del path
+      const isFinalSection = scrollProgress >= FINAL_SECTION_START;
       
-      if (!hasLanded) {
-        ref.current.position.lerp(currentCenterPosition, FALL_SPEED);
-        // Forzar centrado en móvil
-        if (isMobileDevice) ref.current.position.x = 0;
-      } else if (scrollProgress < ENTRY_SCROLL_LIMIT) {
-        ref.current.position.lerp(currentEntryPosition, ENTRY_SPEED);
-        // Forzar centrado en móvil
-        if (isMobileDevice) ref.current.position.x = 0;
+      if (!isFinalSection) {
+        // Path continuo sin saltos: usar interpolación continua en lugar de índices discretos
+        const pathProgress = THREE.MathUtils.clamp(
+          (scrollProgress - ENTRY_SCROLL_LIMIT) / (FINAL_SECTION_START - ENTRY_SCROLL_LIMIT),
+          0,
+          1
+        );
+        
+        // Interpolación continua a lo largo de todos los puntos del path
+        const totalSegments = modelPositions.length - 1;
+        const continuousIndex = pathProgress * totalSegments;
+        const segmentIndex = Math.floor(continuousIndex);
+        const clampedIndex = Math.min(segmentIndex, totalSegments - 1);
+        const localT = continuousIndex - clampedIndex;
+        
+        const start = modelPositions[clampedIndex];
+        const end = modelPositions[clampedIndex + 1];
+        const easedT = easeOutCubic(localT);
+        
+        targetPosition.current.lerpVectors(start, end, easedT);
       } else {
-        // Sección OPTIONS: la moneda debe saltar al centro, pero seguir girando.
-        if (isInOptionsSection) {
-          const optsPos = isMobileDevice ? OPTIONS_CENTER_POS_MOBILE : OPTIONS_CENTER_POS_DESKTOP;
-          ref.current.position.lerp(optsPos, 0.03);
-          if (isMobileDevice) ref.current.position.x = 0;
-        } else {
-        const isFinalSection = scrollProgress >= FINAL_SECTION_START;
-        if (!isFinalSection) {
-          const index = Math.min(
-            Math.floor(scrollProgress * (modelPositions.length - 1)),
-            modelPositions.length - 2
-          );
-          const start = modelPositions[index];
-          const end = modelPositions[index + 1];
-          const rawProgress = scrollProgress * (modelPositions.length - 1);
-          const localProgress = Math.min(Math.max(rawProgress - index, 0), 1);
-          const easedProgress = easeOutCubic(localProgress);
-          targetPosition.current.lerpVectors(start, end, easedProgress);
-          ref.current.position.lerp(targetPosition.current, MOVE_SPEED);
-          // Forzar centrado en móvil durante el recorrido
-          if (isMobileDevice) ref.current.position.x = 0;
-        } else {
-          //aca se edita cuando la moneda esta al centro de las opciones
-          // Mantener Y actual cuando scrollProgress >= 0.9 (se ajusta en la sección de rotación)
-          if (scrollProgress >= 0.9) {
-            const currentY = ref.current.position.y;
-            // En móvil siempre centrada horizontalmente
-            const finalX = 0;
-            tempFinalVec.current.set(finalX, currentY, 10);
-            ref.current.position.lerp(tempFinalVec.current, FINAL_SPEED);
-            if (isMobileDevice) ref.current.position.x = 0;
-          } else {
-            // En móvil siempre centrada horizontalmente
-            const finalX = 0;
-            tempFinalVec.current.set(finalX, 0, 10);
-            ref.current.position.lerp(tempFinalVec.current, FINAL_SPEED);
-            if (isMobileDevice) ref.current.position.x = 0;
-          }
-        }
-        }
+        // Sección final: posición hacia adelante con elevación suave
+        const finalProgress = THREE.MathUtils.clamp(
+          (scrollProgress - FINAL_SECTION_START) / (1.0 - FINAL_SECTION_START),
+          0,
+          1
+        );
+        
+        // Elevación suave desde 0.82
+        const liftAmount = (scrollProgress - 0.82) * 2.5;
+        const baseY = 0;
+        const targetY = baseY + Math.max(0, liftAmount);
+        
+        const finalX = 0;
+        const finalZ = THREE.MathUtils.lerp(10, 20, finalProgress);
+        tempFinalVec.current.set(finalX, targetY, finalZ);
+        targetPosition.current.copy(tempFinalVec.current);
       }
 
-      // ROTACIÓN
-      if (scrollProgress >= 0.82) {
-        // Cuando scrollProgress >= 0.82, orientar la moneda hacia la cámara
-        tempMatrix.lookAt(
-          ref.current.position,
-          camera.position,
-          ref.current.up
-        );
-        tempQuat.setFromRotationMatrix(tempMatrix);
-        tempQuat.multiply(offsetQuat);
-        ref.current.quaternion.slerp(tempQuat, 0.08);
-        
-        // Subir la moneda levemente mientras se orienta hacia la cámara
-        if (scrollProgress >= 0.82) {
-          const liftAmount = (scrollProgress - 0.82) * 0.5; // Sube hasta 0.2 unidades
-          const baseY = 0; // Posición base Y
-          const targetY = baseY + liftAmount;
-          ref.current.position.y = THREE.MathUtils.lerp(
-            ref.current.position.y,
-            targetY,
-            0.05
-          );
-          // Forzar centrado en móvil durante la rotación
-          if (isMobileDevice) ref.current.position.x = 0;
-        }
-      } else {
-        // Rotación normal antes de llegar a 0.9
-        ref.current.rotation.y += delta * 0.5;
-        ref.current.rotation.x += delta * 0.2;
+      // Mezclar con posición de OPTIONS si estamos en esa sección
+      blendedTarget.current.copy(targetPosition.current);
+      if (optionsWeight > 0) {
+        blendedTarget.current.lerp(optsPos, optionsWeight);
       }
+
+      // Aplicar movimiento suave y uniforme
+      ref.current.position.lerp(blendedTarget.current, damp(MOVE_DAMPING));
+      
+      // Forzar centrado en móvil
+      if (isMobileDevice) ref.current.position.x = 0;
+    }
+
+    // =========================
+    // ROTACIÓN (suave y continua)
+    // =========================
+    if (scrollProgress >= 0.82) {
+      // Orientar hacia la cámara con transición suave
+      tempMatrix.lookAt(
+        ref.current.position,
+        camera.position,
+        ref.current.up
+      );
+      tempQuat.setFromRotationMatrix(tempMatrix);
+      tempQuat.multiply(offsetQuat);
+      ref.current.quaternion.slerp(tempQuat, damp(4.0));
+    } else {
+      // Rotación normal antes de 0.82
+      ref.current.rotation.y += delta * 0.5;
+      ref.current.rotation.x += delta * 0.2;
+    }
   });
 
   return (

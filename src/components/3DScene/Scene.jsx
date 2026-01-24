@@ -1,4 +1,5 @@
-import { useRef, useContext, useState, useEffect } from "react";
+/* eslint-disable react/no-unknown-property */
+import { useRef, useContext, useEffect } from "react";
 import { CoinModel } from "../3DModels/CoinModel";
 import { CombinedGlasses } from "../3DModels/CombinedGlasses";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -194,31 +195,21 @@ const CoinLightRig = () => {
 
 
 export const Scene = () => {
-  const { scrollProgress, activeInfo, maletinRef, cajafuerteRef, astronautaRef, moveModelTo, astronauta2Ref, coinHasLanded, isLeavingOptions } = useContext(AppContext);
+  const { scrollProgress, activeInfo, coinHasLanded, isLeavingOptions } =
+    useContext(AppContext);
   const {  camera } = useThree();
 
   const combinedGlasses = {
-    position: [0, 0, 0],
+    position: [0, 0, -8],
     rotation: [0, 0, 0],
     scale: 1,
   };
 
-  // Calcular visibilidad y opacidad de los glases basado en scrollProgress
+  // Calcular visibilidad de los glases basado en scrollProgress
+  // Importante: antes se usaba un end (0.52) distinto al fin de la sección (0.55),
+  // eso causaba cortes bruscos entre secciones. Ahora lo dejamos consistente.
   const isInOptionsScreen = scrollProgress >= 0.35 && scrollProgress < 0.55;
   const showGlasses = isInOptionsScreen && !activeInfo && !isLeavingOptions;
-  
-  // Animación suave de entrada/salida basada en scrollProgress
-  const getGlassOpacity = (startProgress, endProgress) => {
-    if (scrollProgress < startProgress || scrollProgress > endProgress) return 0;
-    const progress = (scrollProgress - startProgress) / (endProgress - startProgress);
-    // Easing suave
-    const eased = progress < 0.5 
-      ? 2 * progress * progress 
-      : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-    return Math.max(0, Math.min(1, eased));
-  };
-
-  const combinedOpacity = getGlassOpacity(0.35, 0.52);
   const glassesZOffset = -3;
 
   // Habilitar el layer de luces de la moneda en la cámara
@@ -291,19 +282,17 @@ export const Scene = () => {
       <CoinModel scrollProgress={scrollProgress} />
 
       {/* Modelo combinado de gafas integrado en el canvas principal */}
-      {showGlasses && (
-        <CombinedGlasses
-          position={[
-            combinedGlasses.position[0],
-            combinedGlasses.position[1],
-            combinedGlasses.position[2] + glassesZOffset,
-          ]}
-          rotation={combinedGlasses.rotation}
-          scale={combinedGlasses.scale}
-          visible={combinedOpacity > 0}
-          opacity={combinedOpacity}
-        />
-      )}
+      <CombinedGlasses
+        position={[
+          combinedGlasses.position[0],
+          combinedGlasses.position[1],
+          combinedGlasses.position[2] + glassesZOffset,
+        ]}
+        rotation={combinedGlasses.rotation}
+        scale={combinedGlasses.scale}
+        visible={showGlasses}
+        opacity={1}
+      />
 
     </>
   );
