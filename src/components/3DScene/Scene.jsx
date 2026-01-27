@@ -86,105 +86,105 @@ const CoinLightRig = () => {
       />
       <directionalLight
         ref={keyRef}
-        position={[4.2, 2.4, 5.2]}
-        intensity={2.8}
+        position={[15, 10, 20]}
+        intensity={1.8}
         color={"#ffd39a"}
         castShadow={false}
       />
       <pointLight
         ref={fillRef}
-        position={[-4.0, 1.4, 3.2]}
-        intensity={1.8}
+        position={[-15, 8, 12]}
+        intensity={1.0}
         color={"#ffffff"}
-        distance={90}
-        decay={1.9}
+        distance={120}
+        decay={2.2}
         castShadow={false}
       />
       <pointLight
         ref={rimRef}
-        position={[0.0, 3.8, -5.2]}
-        intensity={2.0}
+        position={[0.0, 12, -15]}
+        intensity={1.2}
         color={"#e8f2ff"}
-        distance={90}
-        decay={1.9}
+        distance={120}
+        decay={2.2}
         castShadow={false}
       />
       <pointLight
         ref={bounceRef}
-        position={[0.0, -2.2, 2.2]}
-        intensity={1.3}
+        position={[0.0, -10, 8]}
+        intensity={0.8}
         color={"#ffdb8f"}
-        distance={70}
-        decay={1.9}
+        distance={100}
+        decay={2.2}
         castShadow={false}
       />
       <spotLight
         ref={sparkleARef}
-        position={[2.2, 0.6, 3.6]}
-        intensity={4.0}
+        position={[12, 5, 18]}
+        intensity={2.0}
         color={"#ffffff"}
-        angle={0.6}
-        penumbra={0.7}
-        distance={110}
-        decay={1.9}
+        angle={0.3}
+        penumbra={1}
+        distance={150}
+        decay={2.2}
         castShadow={false}
       />
       <spotLight
         ref={sparkleBRef}
-        position={[-2.4, 1.2, 3.8]}
-        intensity={3.2}
+        position={[-12, 6, 18]}
+        intensity={1.6}
         color={"#fff9e3"}
-        angle={0.55}
-        penumbra={0.75}
-        distance={110}
-        decay={1.9}
+        angle={0.3}
+        penumbra={1}
+        distance={150}
+        decay={2.2}
         castShadow={false}
       />
       <pointLight
         ref={frontRef}
-        position={[0.0, 0.2, 6.5]}
-        intensity={3.2}
+        position={[0.0, 1, 25]}
+        intensity={1.8}
         color={"#ffe8ba"}
-        distance={130}
-        decay={1.9}
+        distance={180}
+        decay={2.2}
         castShadow={false}
       />
       
-      {/* Luces de "halo" para que irradie poder alrededor */}
+      {/* Luces de "halo" para que irradie poder alrededor - más suaves */}
       <pointLight
         position={[0.0, 0.0, 0.0]}
-        intensity={1.8}
+        intensity={1.0}
         color={"#ffd700"}
         distance={20}
-        decay={1.8}
+        decay={2.2}
       />
       <pointLight
-        position={[3.0, 0.0, 0.0]}
-        intensity={1.0}
+        position={[10.0, 0.0, 0.0]}
+        intensity={0.5}
         color={"#ffe97d"}
-        distance={18}
-        decay={2}
+        distance={25}
+        decay={2.5}
       />
       <pointLight
-        position={[-3.0, 0.0, 0.0]}
-        intensity={1.0}
+        position={[-10.0, 0.0, 0.0]}
+        intensity={0.5}
         color={"#ffe97d"}
-        distance={18}
-        decay={2}
+        distance={25}
+        decay={2.5}
       />
       <pointLight
-        position={[0.0, 3.0, 0.0]}
-        intensity={1.0}
+        position={[0.0, 10.0, 0.0]}
+        intensity={0.5}
         color={"#fff4d6"}
-        distance={18}
-        decay={2}
+        distance={25}
+        decay={2.5}
       />
       <pointLight
-        position={[0.0, -3.0, 0.0]}
-        intensity={1.0}
+        position={[0.0, -10.0, 0.0]}
+        intensity={0.5}
         color={"#ffda6a"}
-        distance={18}
-        decay={2}
+        distance={25}
+        decay={2.5}
       />
     </group>
   );
@@ -209,8 +209,10 @@ export const Scene = () => {
   // Importante: antes se usaba un end (0.52) distinto al fin de la sección (0.55),
   // eso causaba cortes bruscos entre secciones. Ahora lo dejamos consistente.
   const isInOptionsScreen = scrollProgress >= 0.35 && scrollProgress < 0.55;
-  const showGlasses = isInOptionsScreen && !activeInfo && !isLeavingOptions;
-  const glassesZOffset = -3;
+  // Mantener glasses visibles incluso cuando hay activeInfo (para que la moneda pase por detrás)
+  const showGlasses = isInOptionsScreen && !isLeavingOptions;
+  // Cuando hay activeInfo, mover los glasses hacia adelante para que la moneda pase por detrás
+  const glassesZOffset = activeInfo ? 15 : -3;
 
   // Habilitar el layer de luces de la moneda en la cámara
   useEffect(() => {

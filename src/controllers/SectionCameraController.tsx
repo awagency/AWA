@@ -18,11 +18,14 @@ export const SectionCameraControls = ({
   scrollProgress: number,
   cameraTarget: number[],
   setCameraTarget: (target: number[]) => void,
-  activeInfo: string
+  activeInfo: string,
+  setActiveInfo: (info: string) => void
 }) => {
   const { camera } = useThree();
   const lookAtTarget = useRef(new THREE.Vector3(0, 0, 0));
   const targetVec = useRef(new THREE.Vector3());
+  // Ref para evitar llamadas repetidas a setActiveInfo
+  const lastActiveInfoReset = useRef<string | null>(null);
 
   // Función para interpolar la posición de la cámara
   const interpolateCameraPosition = (targetPosition, lerpFactor) => {
@@ -31,11 +34,20 @@ export const SectionCameraControls = ({
     camera.lookAt(lookAtTarget.current);
   };
 
+  // Función helper para resetear activeInfo solo cuando es necesario
+  const resetActiveInfoIfNeeded = () => {
+    if (activeInfo !== "" && lastActiveInfoReset.current !== "reset") {
+      lastActiveInfoReset.current = "reset";
+      setActiveInfo("");
+    }
+  };
+
   useFrame(() => {
     if (scrollProgress <= 0.1) {
       camera.position.copy(CAM_POS_START); // Posición inicial
-      setActiveInfo("");
+      resetActiveInfoIfNeeded();
     } else if (scrollProgress >= 0.4 && scrollProgress < 0.55) {
+      lastActiveInfoReset.current = null; // Permitir futuros resets
       if (activeInfo === "") {
         interpolateCameraPosition(CAM_POS_OPTIONS, 0.03);
       } else {
@@ -43,15 +55,12 @@ export const SectionCameraControls = ({
         interpolateCameraPosition(targetVec.current, 0.03);
       }
     } else if (scrollProgress >= 0.55 && scrollProgress < 0.9) {
-      setActiveInfo("");
-
+      resetActiveInfoIfNeeded();
       interpolateCameraPosition(CAM_POS_CARDS, 0.03);
     } else if (scrollProgress >= 0.9) {
-      // interpolateCameraPosition(new THREE.Vector3(0, -0.03, 10.15), 0.05);
       interpolateCameraPosition(CAM_POS_FINAL, 0.05);
     } else {
-      setActiveInfo("");
-
+      resetActiveInfoIfNeeded();
       interpolateCameraPosition(CAM_POS_START, 0.03);
     }
   });

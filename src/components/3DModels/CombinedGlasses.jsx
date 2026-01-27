@@ -10,11 +10,11 @@ useGLTF.preload("/GLASES222.glb");
 const STAGGER_DELAY_S = 0.5;
 const STAGGER_FADE_S = 0.35;
 
-// Colores distintos para cada mesh (más vibrantes y saturados)
+// Colores distintos para cada mesh (vidrio con tinte vibrante)
 const MESH_COLORS = [
-  new THREE.Color(1.0, 0.6, 0.8),   // Rosa vibrante (Curve.012)
-  new THREE.Color(0.4, 0.7, 1.0),    // Azul vibrante (Curve)
-  new THREE.Color(0.5, 1.0, 0.6),   // Verde vibrante (Curve.003)
+  new THREE.Color(1.0, 0.6, 0.8),      // Rosa vibrante (Curve.012)
+  new THREE.Color(0.6, 0.8, 1.0),      // Azul vibrante (Curve)
+  new THREE.Color(0.7, 1.0, 0.75),     // Verde vibrante (Curve.003)
 ];
 
 function getNameOrder(name) {
@@ -38,6 +38,7 @@ export const CombinedGlasses = ({
   const meshEntriesRef = useRef([]);
   const opacityRef = useRef(1);
   const seqTimeRef = useRef(0);
+  const targetPositionRef = useRef(new THREE.Vector3(...position));
 
   const clonedScene = useMemo(() => {
     if (!scene) return null;  
@@ -87,15 +88,22 @@ export const CombinedGlasses = ({
             const glassMat = new THREE.MeshPhysicalMaterial({
               name: mat.name,
               color: new THREE.Color(1, 1, 1), // Color temporal, se actualizará después
+              emissive: new THREE.Color(0, 0, 0), // Se actualizará después para brillo
+              emissiveIntensity: 0.15,         // Brillo sutil desde dentro
               metalness: 0,
-              roughness: 0.65,
-              transmission: 1,
-              ior: 1.45,
-              thickness: 0.15,
+              roughness: 0.05,                 // Muy liso para reflejos claros
+              transmission: 0.92,              // Alta transmisión - vidrio limpio
+              ior: 1.5,                        // Índice de refracción del vidrio
+              thickness: 0.3,
               transparent: true,
               opacity: mat.userData.baseOpacity ?? 1,
               side: THREE.DoubleSide,
-              envMapIntensity: 1.2,
+              envMapIntensity: 2.2,            // Más reflejos del entorno
+              clearcoat: 0.6,                  // Capa brillante más intensa
+              clearcoatRoughness: 0.05,        // Clearcoat más pulido
+              reflectivity: 0.6,               // Reflectividad mayor
+              specularIntensity: 1.2,          // Más brillo especular
+              specularColor: new THREE.Color(1, 1, 1),
             });
 
             glassMat.roughnessMap = roughnessTexture;
@@ -148,11 +156,14 @@ export const CombinedGlasses = ({
     // Ahora asignamos los colores según el orden final
     meshEntries.forEach((entry, index) => {
       const meshColor = MESH_COLORS[index % MESH_COLORS.length].clone();
+      // Color emissive más sutil (30% del color base)
+      const emissiveColor = meshColor.clone().multiplyScalar(0.3);
       
       entry.materials.forEach((mat) => {
         // Aplicar color a materiales de vidrio
         if (mat.isMeshPhysicalMaterial) {
           mat.color.copy(meshColor);
+          mat.emissive.copy(emissiveColor);
           mat.needsUpdate = true;
         }
         // Aplicar color a materiales no-vidrio si tienen la propiedad color
@@ -168,6 +179,10 @@ export const CombinedGlasses = ({
 
   useFrame((_state, delta) => {
     if (!groupRef.current || !clonedScene) return;
+
+    // Interpolar suavemente la posición del grupo
+    targetPositionRef.current.set(...position);
+    groupRef.current.position.lerp(targetPositionRef.current, 0.08);
 
     // Opacidad global (se puede usar para bajar intensidad sin afectar el stagger)
     opacityRef.current += (opacity - opacityRef.current) * 0.1;
@@ -216,7 +231,7 @@ export const CombinedGlasses = ({
   if (!clonedScene) return null;
 
   return (
-    <group ref={groupRef} position={position} rotation={rotation} scale={scale}>
+    <group ref={groupRef} rotation={rotation} scale={scale}>
       <primitive object={clonedScene} />
     </group>
   );
